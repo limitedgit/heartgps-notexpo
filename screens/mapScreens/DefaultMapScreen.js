@@ -56,8 +56,10 @@ const pinImage = require("../../images/map-pin.png");
 
  
   return (
-    <SafeAreaView style = {styles.container}>
-      {/* <TouchableWithoutFeedback onPress={Keyboard.dismiss}> */}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <View style = {styles.container}>
+
+      
       {/* <View> */}
         <MapView style={styles.map}
         provider={MapView.PROVIDER_GOOGLE}
@@ -65,6 +67,8 @@ const pinImage = require("../../images/map-pin.png");
           region={region}
           // onRegionChange={onRegionChange}
           />
+    
+
           <View style = {styles.searchbar}>
           <GooglePlacesAutocomplete
               //currentLocation = {true}
@@ -93,21 +97,26 @@ const pinImage = require("../../images/map-pin.png");
           />
           </View>
           
+
+       
           <View style={styles.centerMarker}>
           
             <Image style = {styles.marker} 
             source={ pinImage }/>
             
             </View>
-            
-        
-
            
+            
+          
+     
+      <View style = {{flex: 0.3}}>
 
-            {/* </View> */}
-      {/* </TouchableWithoutFeedback> */}
-
-      <View >
+        <Pressable>
+          <Text>
+            send
+          </Text>
+          </Pressable>
+        
         <Pressable onPress={() => {
           navigation.goBack()}}>
           <Text>
@@ -115,15 +124,17 @@ const pinImage = require("../../images/map-pin.png");
           </Text>
         </Pressable>
       </View>
+     
 
        
-    </SafeAreaView>)
+    </View>
+    </TouchableWithoutFeedback>)
 }
 
 const styles = StyleSheet.create( 
   {
     container :{
-      flex:0.7, 
+      flex:1, 
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'center',   

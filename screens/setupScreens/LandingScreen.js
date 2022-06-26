@@ -7,32 +7,36 @@ export default function LandingScreen({navigation}) {
     return (
         <View style = {styles.container}>
 
+            {/* logo image */}
             <Image  style = {styles.logo}source={require("../../images/heartGPS-logo.png")}/>
 
             <View style = {styles.signInOptions}>
 
-            <Pressable style = {styles.button} onPress={() => navigation.navigate("Register")}>
-            <Text style = {styles.buttonText}>Sign Up with Phone Number</Text>
-            </Pressable>
+                {/* sign up button */}
+                <Pressable style = {styles.button} onPress={() => navigation.navigate("Register")}>
+                    <Text style = {styles.buttonText}>Sign Up with Phone Number</Text>
+                </Pressable>
 
-            <View style = {{height: SCREEN_HEIGHT*0.05}}>
+                {/* divider */}
+                <View style = {{height: SCREEN_HEIGHT*0.05}}/>
 
-            </View>
+            
 
-            <Text style = {{fontSize: 15}}>
-            Already have an account?
-            </Text>
+                {/* log in button */}
+                <Text style = {{fontSize: 15}}>
+                    Already have an account?
+                </Text>
+                <Pressable style = {styles.button} onPress={() => navigation.navigate("Login")}>
+                    <Text style = {styles.buttonText}>Log in</Text>
+                </Pressable>
 
-            <Pressable style = {styles.button} onPress={() => navigation.navigate("Login")}>
-            <Text style = {styles.buttonText}>Log in</Text>
-            </Pressable>
 
-            <Text> by using our services you agree to our</Text>
-
-            <Text style={{color: 'blue'}}
-                onPress={() => Linking.openURL('http://google.com')}>
-                terms and conditions
-            </Text>
+                {/* terms and conditions */}
+                <Text> by using our services you agree to our</Text>
+                <Text style={{color: 'blue'}}
+                    onPress={() => Linking.openURL('http://google.com')}>
+                    terms and conditions
+                </Text>
 
             </View>
         

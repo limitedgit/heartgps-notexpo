@@ -8,35 +8,46 @@ const SCREEN_WIDTH = Dimensions.get('window').width
 export default function AgeScreen({navigation}) {
     return (
 
-
-
+        // keyboard dismisser
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style = {styles.container}>
+
+            
             <Text style = {styles.Title}>
-            Please enter your age
+                Please enter your age
             </Text>
             <TextInput style = {styles.code} autoComplete='tel'   keyboardType={'phone-pad'} maxLength={6}/>
+            
+
+            {/* enter button */}
             <Pressable 
-            style = {styles.button}
-            onPress={() => navigation.navigate("Main")}
-            > 
+                style = {styles.button}
+                onPress={() => navigation.navigate("Main")}
+                > 
                 <Text style = {styles.buttonText}> enter </Text>
             </Pressable>
-        <View style = {{flex: 0.05}}/> 
+            
+            {/* divider */}
+            <View style = {{flex: 0.05}}/> 
 
 
+            {/* next button */}
             <Pressable 
                 style = {styles.button}
                 > 
                 <Text style = {styles.buttonText}>Next</Text>
             </Pressable>
 
+
+            {/* back button */}
             <Pressable 
             style = {styles.button}
-            onPress={() => navigation.navigate("Register")}
+            onPress={() => navigation.goBack()}
             > 
                 <Text style = {styles.buttonText}> back </Text>
             </Pressable>
+
+
         </View>
         </TouchableWithoutFeedback>
     );

@@ -1,10 +1,12 @@
 import {combineReducers} from "redux";
-import loginReducer from "./loginReducer";
-import locationReducer from "./locationReducer";
+import login from "./loginReducer";
+import location from "./locationReducer";
+import user from './userReducer'
 
 const reducers = combineReducers({
-    loginReducer,
-    locationReducer,
+    login,
+    location,
+    user,
 })
 
 export default reducers

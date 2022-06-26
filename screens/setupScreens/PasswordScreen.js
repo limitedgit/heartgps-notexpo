@@ -24,9 +24,11 @@ export default function PasswordScreen({navigation}) {
         placeholder='please re-enter your password'
         />  
         <Button
-
         title = "confirm"
         onPress={()=> navigation.navigate("Age")}/>
+        <Button
+        title = "back"
+        onPress={()=> navigation.goBack()}/>
     </View>
     </TouchableWithoutFeedback>
   )

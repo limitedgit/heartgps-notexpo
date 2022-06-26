@@ -4,6 +4,7 @@ import {CognitoUserPool,CognitoUserAttribute,CognitoUser,AuthenticationDetails,}
 import {Pressable, View, Text, Button, StyleSheet, TextInput, TouchableWithoutFeedback, Dimensions} from 'react-native';
 import { Keyboard } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
+
 const SCREEN_HEIGHT = Dimensions.get('window').height
 const SCREEN_WIDTH = Dimensions.get('window').width
 var poolData = {
@@ -15,8 +16,10 @@ var userPool = new CognitoUserPool(poolData);
 const region = "us-east-1";
 
 
-export default function VerifyScreen({navigation}) {
+export default function LoginVerifyScreen({ route, navigation }) {
+    const {cognitoCallback} = route.params
     const user = useSelector((state) => state.user.currentUser)
+    console.log("login verify user: ", user)
     const [verifyCode, changeVerfiyCode] = useState(null);
     var userData = {
         Username: user,
@@ -32,7 +35,8 @@ export default function VerifyScreen({navigation}) {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style = {styles.container}>
             <Text style = {styles.Title}>
-                Please enter the 6 digit code you recieved through SMS
+                verify your login
+            Please enter the 6 digit code you recieved through SMS
             </Text>
 
             <TextInput style = {styles.code} 
@@ -42,56 +46,36 @@ export default function VerifyScreen({navigation}) {
             onChangeText = {changeVerfiyCode}/>
 
             <Pressable 
-                style = {styles.button}
-                onPress={() => {
+            style = {styles.button}
+            onPress={() => {
+                if (verifyCode == null){
+                    alert("please enter the code you recieved through SMS")
+                    return
+                }
+                cognitoUser.sendMFACode(verifyCode, cognitoCallback)
+                
+   
 
-                    
-                    if (verifyCode == null){
-                        alert("please enter the code you recieved through SMS")
-                        return
-                    }
-                    cognitoUser.confirmRegistration(verifyCode, true, function(err, result) {
-                    if (err) {
-                        alert(err.message || JSON.stringify(err));
-                        return;
-                    }
-                    var authenticationData = {
-                        Username: user,
-                        Password: 'password',
-                    };
-                    var authenticationDetails = new AuthenticationDetails(authenticationData);
-                    cognitoUser.authenticateUser(authenticationDetails, {
-                        onSuccess: function(result) {
-                        var accessToken = result.getAccessToken().getJwtToken();
-                    },
-                        onFailure: function(err) {
-                            alert(err.message || JSON.stringify(err));
-                        },
-                    });
-                    navigation.navigate("Password")
-                    });
-
-                    
-                    // var smsMfaSettings = {
-                    //     PreferredMfa: true,
-                    //     Enabled: true,
-                    // };
-                    // cognitoUser.setUserMfaPreference(smsMfaSettings, null, function(err, result) {
-                    // if (err) {
-                    //     alert(err.message || JSON.stringify(err));
-                    // }
-                    // console.log('call result ' + result);
-                    // });
-                    
-                    
-                    }}
-                > 
+                
+                // var smsMfaSettings = {
+                //     PreferredMfa: true,
+                //     Enabled: true,
+                // };
+                // cognitoUser.setUserMfaPreference(smsMfaSettings, null, function(err, result) {
+                // if (err) {
+                //     alert(err.message || JSON.stringify(err));
+                // }
+                // console.log('call result ' + result);
+                // });
+                
+                
+                }}
+            > 
                 <Text style = {styles.buttonText}> enter </Text>
             </Pressable>
+        <View style = {{flex: 0.05}}/> 
 
-            <View style = {{flex: 0.05}}/> 
-
-            <Text> Didn't recieve a code?</Text>
+        <Text> Didn't recieve a code?</Text>
 
 
 
@@ -111,9 +95,9 @@ export default function VerifyScreen({navigation}) {
             </Pressable>
 
             <Pressable 
-                style = {styles.button}
-                onPress={() => navigation.goBack()}
-                > 
+            style = {styles.button}
+            onPress={() => navigation.goBack()}
+            > 
                 <Text style = {styles.buttonText}> back </Text>
             </Pressable>
         </View>

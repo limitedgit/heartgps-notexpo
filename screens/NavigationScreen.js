@@ -13,6 +13,7 @@ import VerifyScreen from './setupScreens/VerifyScreen';
 import LoginScreen from './setupScreens/LoginScreen';
 import MainSettings from './settings/MainSettings';
 import DefaultMapScreen from './mapScreens/DefaultMapScreen';
+import LoginVerifyScreen from './setupScreens/LoginVerify';
 //location setup
 
 
@@ -24,13 +25,15 @@ export default function NavigationScreen() {
   const Stack = createNativeStackNavigator();
 
   //redux state selector
-  const isLoggedIn = useSelector((state) => state.login); 
+  const user = useSelector((state) => state.user); 
+  console.log("user", user)
+  
   
     return (
         <NavigationContainer>
         <Stack.Navigator    
         // initialRouteName= {( isLoggedIn ? "Main" : "Landing")}
-        initialRouteName= {"Main"}
+        initialRouteName= {( user.currentUser ? "Main" : "Landing")}
         screenOptions={{
             headerShown: false
           }}>
@@ -43,6 +46,7 @@ export default function NavigationScreen() {
           <Stack.Screen name="MainSettings" component={MainSettings} options={{gestureEnabled: false}}/>
           <Stack.Screen name="Age" component={AgeScreen} options={{gestureEnabled: false}}/>
           <Stack.Screen name="DefaultMap" component={DefaultMapScreen} options={{gestureEnabled: false}}/>
+          <Stack.Screen name="LoginVerify" component={LoginVerifyScreen} options={{gestureEnabled: false}}/>
         </Stack.Navigator>
         
       </NavigationContainer>
