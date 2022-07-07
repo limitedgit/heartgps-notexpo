@@ -7,8 +7,8 @@ const SCREEN_WIDTH = Dimensions.get('window').width
 
 
 
-export default function AgeScreen({navigation}) {
-    const [Age, setAge] = useState(null);
+export default function NameScreen({navigation}) {
+    const [Name, setName] = useState(null);
     const dispatch  = useDispatch();
 
     
@@ -20,13 +20,10 @@ export default function AgeScreen({navigation}) {
 
             
             <Text style = {styles.Title}>
-                Please enter your age
+                Please enter your preferred name (will be displayed on your profile)
             </Text>
             <TextInput style = {styles.code} 
-            autoComplete='tel'   
-            keyboardType={'phone-pad'} 
-            maxLength={6}
-            onChangeText = {setAge}
+            onChangeText = {setName}
             />
             
 
@@ -36,14 +33,15 @@ export default function AgeScreen({navigation}) {
                 onPress={
 
                     () => {
-                        if (parseInt(Age) < 18){
-                            alert("you must be 18 or older to use this app, please come back later")
+                        if (Name == null || Name == ""){
+                            alert("please enter a name")
                             return
                         }
-                        dispatch({type: "setAge", payload: Age}), [dispatch]
+                    
+                        dispatch({type: "setName", payload: Name}), [dispatch]
 
                         
-                        navigation.navigate("Name")}}
+                        navigation.navigate("Gender")}}
                 > 
                 <Text style = {styles.buttonText}> enter </Text>
             </Pressable>

@@ -1,5 +1,6 @@
 import React from 'react';
 import {Pressable, View, Text, Linking, StyleSheet, Dimensions, Image} from 'react-native';
+import appStyles from '../../appstyles';
 const SCREEN_HEIGHT = Dimensions.get('window').height
 const SCREEN_WIDTH = Dimensions.get('window').width
 
@@ -23,7 +24,7 @@ export default function LandingScreen({navigation}) {
             
 
                 {/* log in button */}
-                <Text style = {{fontSize: 15}}>
+                <Text style = {styles.text}>
                     Already have an account?
                 </Text>
                 <Pressable style = {styles.button} onPress={() => navigation.navigate("Login")}>
@@ -32,7 +33,7 @@ export default function LandingScreen({navigation}) {
 
 
                 {/* terms and conditions */}
-                <Text> by using our services you agree to our</Text>
+                <Text style = {styles.text}> by using our services you agree to our</Text>
                 <Text style={{color: 'blue'}}
                     onPress={() => Linking.openURL('http://google.com')}>
                     terms and conditions
@@ -45,13 +46,8 @@ export default function LandingScreen({navigation}) {
 }
 
 const styles = StyleSheet.create({
-    container :{
-        flex:1, 
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        
-    },
+    ...appStyles,
+    
     logo:{
         width : SCREEN_WIDTH * 0.5,
         height : SCREEN_HEIGHT * 0.2,
@@ -61,16 +57,6 @@ const styles = StyleSheet.create({
         top: SCREEN_HEIGHT * 0.2,
         alignItems: 'center',
     },
-    button: {
-        padding: 5,
-        borderRadius: 15, 
-        borderWidth: 2,
-        backgroundColor: "black",
-        
-    },
-    buttonText: {
-        fontSize: 15,
-        color: 'white',
-    }
+   
         
 })

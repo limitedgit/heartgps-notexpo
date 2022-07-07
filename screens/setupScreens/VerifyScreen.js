@@ -23,7 +23,54 @@ export default function VerifyScreen({navigation}) {
         Pool: userPool,
     };
     var cognitoUser = new CognitoUser(userData);
+    const dispatch = useDispatch()
     
+    const cognitoCallbacks = {
+        onSuccess: async function(result) {
+            console.log("fishbanes")
+            
+            let idToken = result.getIdToken().getJwtToken();
+            let accessToken = result.getAccessToken().getJwtToken();
+
+            var smsMfaSettings = {
+                PreferredMfa: true,
+                Enabled: true,
+            };
+            console.log("mfa setting")
+            cognitoUser.setUserMfaPreference(smsMfaSettings, null, function(err, result) {
+                if (err) {
+                    alert(err.message || JSON.stringify(err));
+                }
+                console.log('call result ' + result);
+            });
+            console.log("mfa set")
+
+            try {
+                await EncryptedStorage.setItem(
+                    "user_session",
+                    JSON.stringify({
+                        idToken : idToken,
+                        accessToken : accessToken,
+                        username : phoneNumber,
+                    })
+                );
+        
+                // Congrats! You've just stored your first value!
+            } catch (error) {
+                // There was an error on the native side
+            }
+
+            dispatch({type: "setUser", payload: cognitoUser.getUsername()}), [dispatch]
+            
+
+            navigation.navigate("Age")
+
+        
+    },
+        onFailure: function(err) {
+            alert(err.message || JSON.stringify(err));
+        },
+    }
 
 
 
@@ -55,33 +102,18 @@ export default function VerifyScreen({navigation}) {
                         alert(err.message || JSON.stringify(err));
                         return;
                     }
+                    console.log("registration succeess")
                     var authenticationData = {
                         Username: user,
                         Password: 'password',
                     };
                     var authenticationDetails = new AuthenticationDetails(authenticationData);
-                    cognitoUser.authenticateUser(authenticationDetails, {
-                        onSuccess: function(result) {
-                        var accessToken = result.getAccessToken().getJwtToken();
-                    },
-                        onFailure: function(err) {
-                            alert(err.message || JSON.stringify(err));
-                        },
+                    cognitoUser.authenticateUser(authenticationDetails,  cognitoCallbacks);
                     });
-                    navigation.navigate("Password")
-                    });
+                    
 
                     
-                    // var smsMfaSettings = {
-                    //     PreferredMfa: true,
-                    //     Enabled: true,
-                    // };
-                    // cognitoUser.setUserMfaPreference(smsMfaSettings, null, function(err, result) {
-                    // if (err) {
-                    //     alert(err.message || JSON.stringify(err));
-                    // }
-                    // console.log('call result ' + result);
-                    // });
+                  
                     
                     
                     }}

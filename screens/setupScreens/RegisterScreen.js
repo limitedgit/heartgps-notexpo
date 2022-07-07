@@ -8,6 +8,7 @@ import {
 	CognitoUser,
 } from 'amazon-cognito-identity-js';
 import PhoneInput from 'react-native-phone-input'
+import appStyles from '../../appstyles';
 
 //cognito pool data
 var poolData = {
@@ -35,7 +36,7 @@ export default function RegisterScreen({navigation}) {
             <Text style = {styles.text}>
                 Please enter your phone number
             </Text>
-            <Text>
+            <Text style = {styles.text}>
                 (you will recieve a 6 digit verification text)
             </Text>
             
@@ -82,8 +83,8 @@ export default function RegisterScreen({navigation}) {
                                 if (err) {
                                     if (err.message == "User is already confirmed."){
                                         dispatch({type: "setUser", payload: cognitoUser.getUsername()}), [dispatch]
-                                        console.log("There is already an account associated with this Number, please login instead");
-                                        navigation.navigate("Login")
+                                        alert("There is already an account associated with this number, if this is your account please login instead");
+                                        navigation.navigate("Landing")
                                     }
                                     console.log(err.stack);
                                     return;
@@ -133,37 +134,16 @@ export default function RegisterScreen({navigation}) {
 }
 
 const styles = StyleSheet.create({
-    container :{
-        flex:1, 
-        flexDirection: 'column',
-        padding: 44,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    phoneTextInput:{
-        borderWidth: 1,
-        borderRadius: 10,
-        padding: 5,
-
-    },
+    ...appStyles,
+  
+    
     // areaCodeInput: {
     //     flex: 0.2, 
     //     borderWidth: 1,
     //     fontSize: SCREEN_HEIGHT/30,
     //     borderRadius: 15,
     // },
-    text: {
-        fontSize: SCREEN_WIDTH/20,
-    }, button: {
-        padding: 5,
-        borderRadius: 15, 
-        borderWidth: 2,
-        backgroundColor: "black",
-        
-    },
-    buttonText: {
-        fontSize: 15,
-        color: 'white',
-    }
+   
+
         
 })

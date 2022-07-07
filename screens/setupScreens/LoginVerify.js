@@ -15,9 +15,54 @@ var poolData = {
 var userPool = new CognitoUserPool(poolData);
 const region = "us-east-1";
 
+const cognitoCallbacks = {
+    mfaRequired: function(err) {
+    },
+    onSuccess: async function(result) {
+        console.log("success")
+        let idToken = result.getIdToken().getJwtToken();
+        let accessToken = result.getAccessToken().getJwtToken();
+        console.log(`result: ${JSON.stringify(result)}`)
+        console.log(`myAccessToken: ${JSON.stringify(result.getAccessToken())}`)
+        try {
+            await EncryptedStorage.setItem(
+                "user_session",
+                JSON.stringify({
+                    idToken : idToken,
+                    accessToken : accessToken,
+                    username : phoneNumber,
+                })
+            );
+        } catch (error) {
+            
+        }
+        console.log(accessToken)
+        dispatch({type: "setUser", payload: cognitoUser.getUsername()}), [dispatch]
 
-export default function LoginVerifyScreen({ route, navigation }) {
-    const {cognitoCallback} = route.params
+        let userData = await getUserdata();
+        if (userData == null){
+            navigation.navigate("Age")
+        } else {
+            navigation.navigate("Main")
+        }
+        
+    },
+    onFailure: function(err) {
+        
+        if (err.name == "UserNotFoundException"){
+            alert("That user doesn't exist, please sign up instead")
+            navigation.navigate("Landing")
+        } else if (err.name == "CodeMismatchException"){
+            alert("Incorrect code entered")
+        }else{
+            alert(err)
+        }
+        return
+    },
+  }
+
+
+export default function LoginVerifyScreen({ navigation }) {
     const user = useSelector((state) => state.user.currentUser)
     console.log("login verify user: ", user)
     const [verifyCode, changeVerfiyCode] = useState(null);
@@ -26,6 +71,17 @@ export default function LoginVerifyScreen({ route, navigation }) {
         Pool: userPool,
     };
     var cognitoUser = new CognitoUser(userData);
+
+    let authenticationData = {
+        Username: phoneNumber,
+        Password: 'password',
+    };
+   
+    let authenticationDetails = new AuthenticationDetails(authenticationData); 
+    dispatch({type: "setUser", payload: phoneNumber}), [dispatch]
+    cognitoUser.authenticateUser(authenticationDetails, cognitoCallbacks);
+
+
     
 
 

@@ -6,8 +6,8 @@ export default function MainSettings({navigation}) {
 
     <View style = {styles.container}>
          <Button  title='edit pictures'/>
-            <Button title='log out'  onPress={() => navigation.navigate("Landing")}/>
-            <Button title='back'  onPress={() => navigation.navigate("Profile")}/>
+          <Button title='log out'  onPress={() => navigation.navigate("Landing")}/>
+          <Button title='back'  onPress={() => navigation.goBack()}/>
     </View>
 
     

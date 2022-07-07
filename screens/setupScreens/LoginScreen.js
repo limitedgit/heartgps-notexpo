@@ -4,6 +4,8 @@ import { Keyboard } from 'react-native';
 import PhoneInput from 'react-native-phone-input'
 import {CognitoUserPool,CognitoUserAttribute,CognitoUser,AuthenticationDetails,} from 'amazon-cognito-identity-js';
 import { useSelector, useDispatch } from 'react-redux';
+import EncryptedStorage from 'react-native-encrypted-storage';
+import appStyles from '../../appstyles';
 //import Prompt from 'react-native-prompt';
 
 const SCREEN_HEIGHT = Dimensions.get('window').height
@@ -23,32 +25,76 @@ export default function LoginScreen({navigation}) {
     const  [promptVisible, setPromptVisible] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [verifyCode, changeVerifyCode] = useState(null);
+
+    const getUserdata = () => {
+
+        //TODO
+        //fetch userdata from db
+        return null;
+    }
+
+    //callback function for amazon cognito user login
     const cognitoCallbacks = {
-        mfaRequired () {
+        mfaRequired: function(err) {
           // Implement you functionality to show UI for MFA form
           //navigation.navigate("LoginVerify", {cognitoCallbacks});
           setModalVisible(!modalVisible)
         },
-        onSuccess: function(result) {
+        onSuccess: async function(result) {
             console.log("success")
+            let idToken = result.getIdToken().getJwtToken();
             let accessToken = result.getAccessToken().getJwtToken();
+            console.log(`result: ${JSON.stringify(result)}`)
+            console.log(`myAccessToken: ${JSON.stringify(result.getAccessToken())}`)
+            
+
+            try {
+                await EncryptedStorage.setItem(
+                    "user_session",
+                    JSON.stringify({
+                        idToken : idToken,
+                        accessToken : accessToken,
+                        username : phoneNumber,
+                    })
+                );
+        
+                // Congrats! You've just stored your first value!
+            } catch (error) {
+                // There was an error on the native side
+            }
             console.log(accessToken)
             dispatch({type: "setUser", payload: cognitoUser.getUsername()}), [dispatch]
-            navigation.navigate("Main")
+
+            let userData = await getUserdata();
+            if (userData == null){
+                navigation.navigate("Age")
+            } else {
+                navigation.navigate("Main")
+            }
             
         },
         onFailure: function(err) {
-            alert(err);
+            
+            if (err.name == "UserNotFoundException"){
+                alert("That user doesn't exist, please sign up instead")
+                navigation.navigate("Landing")
+            } else if (err.name == "CodeMismatchException"){
+                alert("Incorrect code entered")
+            }else{
+                alert(err)
+            }
+            return
         },
       }
+      
     return (
         // keyboard dismisser
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
 
         <View style = {styles.container}>
             
-            <Text>
-            Enter your phone number
+            <Text style = {styles.text}>
+            Enter your phone number (you will recieve a confirmation code)
             </Text>
 
             
@@ -73,13 +119,12 @@ export default function LoginScreen({navigation}) {
                         transparent={true}
                         visible={modalVisible}
                         onRequestClose={() => {
-                        Alert.alert("Modal has been closed.");
                         setModalVisible(!modalVisible);
                         }}
                     >
                         <View style={styles.centeredView}>
                         <View style={styles.modalView}>
-                            <Text style={styles.modalText}>please enter the verification code  you received through sms</Text>
+                            <Text style={styles.text}>please enter the verification code  you received through sms</Text>
                             <TextInput style = {styles.code} 
                                 autoComplete='tel'   
                                 keyboardType={'phone-pad'} 
@@ -131,7 +176,7 @@ export default function LoginScreen({navigation}) {
                     let authenticationDetails = new AuthenticationDetails(authenticationData); 
                     dispatch({type: "setUser", payload: phoneNumber}), [dispatch]
                     cognitoUser.authenticateUser(authenticationDetails, cognitoCallbacks);
-                    setModalVisible(true)
+                   
                    
                 }}
                 > 
@@ -172,39 +217,19 @@ export default function LoginScreen({navigation}) {
 }
 
 const styles = StyleSheet.create({
-    container :{
-        flex:1, 
-        flexDirection: 'column',
-        padding: 44,
-        justifyContent: 'center',
-    },
-    phoneTextInput:{
-
-        borderWidth: 1,
-        height: SCREEN_HEIGHT/15,
-        fontSize: SCREEN_HEIGHT/30,
-        borderRadius: 15,
-
-    },
+    ...appStyles,
+    
     // areaCodeInput: {
     //     flex: 0.2, 
     //     borderWidth: 1,
     //     fontSize: SCREEN_HEIGHT/30,
     //     borderRadius: 15,
     // }, 
-    button: {
-        padding: 5,
-        borderRadius: 15, 
-        borderWidth: 2,
-        backgroundColor: "black", 
-    },
-    buttonText: {
-        fontSize: 15,
-        color: 'white',
-    },
+ 
+
     modalView: {
         margin: 20,
-        backgroundColor: "white",
+        backgroundColor: "#212121",
         borderRadius: 20,
         padding: 35,
         alignItems: "center",
@@ -228,6 +253,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         height: SCREEN_HEIGHT/15,
         borderRadius: 15,
+        color: "#FDFDFD",
     },
 
         
