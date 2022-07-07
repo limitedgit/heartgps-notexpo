@@ -24,6 +24,7 @@ const appStyles = StyleSheet.create({
         borderWidth: 1,
         height: SCREEN_HEIGHT/15,
         borderRadius: 15,
+        color: "#FDFDFD"
     },
     input:{
         color: "#212121",

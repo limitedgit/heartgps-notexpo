@@ -5,6 +5,7 @@ import { RadioButton } from 'react-native-paper';
 import { useDispatch, useSelector } from 'react-redux';
 const SCREEN_HEIGHT = Dimensions.get('window').height
 const SCREEN_WIDTH = Dimensions.get('window').width
+import appStyles from '../../appstyles';
 
 
 const storeProfileToDb = () => {
@@ -37,7 +38,7 @@ export default function GenderPrefScreen({navigation}) {
             {/* divider */}
             <View style = {{flex: 0.05}}/> 
 
-            <Text>men</Text>
+            <Text style = {styles.text}>men</Text>
             <RadioButton
                     value="men"
                     status={ checked === 'men' ? 'checked' : 'unchecked' }
@@ -47,7 +48,7 @@ export default function GenderPrefScreen({navigation}) {
             {/* divider */}
             <View style = {{flex: 0.05}}/> 
 
-            <Text>
+            <Text style = {styles.text}>
                 women
             </Text>
 
@@ -60,7 +61,7 @@ export default function GenderPrefScreen({navigation}) {
             {/* divider */}
             <View style = {{flex: 0.05}}/> 
 
-            <Text>both</Text>
+            <Text style = {styles.text}>both</Text>
             
             <RadioButton
                 value="both"
@@ -115,38 +116,7 @@ export default function GenderPrefScreen({navigation}) {
 }
 
 const styles = StyleSheet.create({
-    container :{
-        flex:1, 
-        flexDirection: 'column',
-        padding: 44,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    code: {
-        width: SCREEN_WIDTH *0.75,
-        borderWidth: 1,
-        height: SCREEN_HEIGHT/15,
-        fontSize: 20,
-        borderRadius: 15,
-    },
-    Title: {
-        fontSize: SCREEN_WIDTH/20,
-    }, button: {
-        padding: 10,
-        borderRadius: 15, 
-        borderWidth: 2,
-        backgroundColor: "black",
-        
-    },
-    buttonText: {
-        fontSize: 15,
-        color: 'white',
-    },
-    clearButton:{
-        padding: 10,
-        borderRadius: 15, 
-        borderWidth: 2,
-
-    },
+    
+    ...appStyles
         
 })

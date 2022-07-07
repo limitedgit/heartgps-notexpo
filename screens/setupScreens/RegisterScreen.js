@@ -10,6 +10,8 @@ import {
 import PhoneInput from 'react-native-phone-input'
 import appStyles from '../../appstyles';
 
+//THIS IS NO LONGER USED, PENDING DELETE
+
 //cognito pool data
 var poolData = {
 	UserPoolId: 'us-east-1_ruYdvZa9g', // Your user pool id here

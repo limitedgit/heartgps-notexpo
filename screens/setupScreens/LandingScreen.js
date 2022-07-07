@@ -14,8 +14,8 @@ export default function LandingScreen({navigation}) {
             <View style = {styles.signInOptions}>
 
                 {/* sign up button */}
-                <Pressable style = {styles.button} onPress={() => navigation.navigate("Register")}>
-                    <Text style = {styles.buttonText}>Sign Up with Phone Number</Text>
+                <Pressable style = {styles.button} onPress={() => navigation.navigate("Login")}>
+                    <Text style = {styles.buttonText}>Sign Up/ Login with Phone Number</Text>
                 </Pressable>
 
                 {/* divider */}

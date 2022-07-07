@@ -16,6 +16,7 @@ export default function ProfileScreen({navigation}) {
             <TouchableOpacity style = {styles.settings}
             onPress = {() => navigation.navigate("MainSettings")}>
                 <Icon
+                color= {"#FDFDFD"}
                 name = "settings"/>
             </TouchableOpacity>
 

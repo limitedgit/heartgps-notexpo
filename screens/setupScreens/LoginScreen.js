@@ -25,6 +25,8 @@ export default function LoginScreen({navigation}) {
     const  [promptVisible, setPromptVisible] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [verifyCode, changeVerifyCode] = useState(null);
+    const [signUp, setSignUp] = useState(false);
+    var attributeList = [];
 
     const getUserdata = () => {
 
@@ -36,18 +38,14 @@ export default function LoginScreen({navigation}) {
     //callback function for amazon cognito user login
     const cognitoCallbacks = {
         mfaRequired: function(err) {
-          // Implement you functionality to show UI for MFA form
-          //navigation.navigate("LoginVerify", {cognitoCallbacks});
           setModalVisible(!modalVisible)
         },
         onSuccess: async function(result) {
             console.log("success")
             let idToken = result.getIdToken().getJwtToken();
             let accessToken = result.getAccessToken().getJwtToken();
-            console.log(`result: ${JSON.stringify(result)}`)
-            console.log(`myAccessToken: ${JSON.stringify(result.getAccessToken())}`)
-            
-
+            // console.log(`result: ${JSON.stringify(result)}`)
+            // console.log(`myAccessToken: ${JSON.stringify(result.getAccessToken())}`)
             try {
                 await EncryptedStorage.setItem(
                     "user_session",
@@ -57,8 +55,6 @@ export default function LoginScreen({navigation}) {
                         username : phoneNumber,
                     })
                 );
-        
-                // Congrats! You've just stored your first value!
             } catch (error) {
                 // There was an error on the native side
             }
@@ -75,9 +71,59 @@ export default function LoginScreen({navigation}) {
         },
         onFailure: function(err) {
             
-            if (err.name == "UserNotFoundException"){
-                alert("That user doesn't exist, please sign up instead")
-                navigation.navigate("Landing")
+            if (err.name == "UserNotFoundException" || err.name == "UserNotConfirmedException"){
+                setSignUp(true);
+                if (phoneNumber === null){
+                    alert("please enter a valid phone number");
+                    return
+                }
+
+                let dataPhoneNumber = {
+                    Name: 'phone_number',
+                    Value: phoneNumber,
+                };
+                let attributePhoneNumber = new CognitoUserAttribute(dataPhoneNumber);
+                attributeList.push(attributePhoneNumber);
+
+                userPool.signUp(phoneNumber, 'password', attributeList, null, function(
+                    err,
+                    result
+                ){
+                    if (err) {
+                    
+                        if (err.name == "UsernameExistsException" ){
+                            let userData = {
+                                Username: phoneNumber,
+                                Pool: userPool,
+                            };
+                        cognitoUser = new CognitoUser(userData);
+                        cognitoUser.resendConfirmationCode(function(err, result) {
+                            if (err) {
+                                if (err.message == "User is already confirmed."){
+                                   //this should be unreachable 
+                                   //unless very strange actions are taken
+                                    setSignUp(false);
+                                    alert("something went wrong, please try again")
+                                }
+    
+                                return;
+                            }
+                            // navigation.navigate("Verify")
+                            setModalVisible(!modalVisible)
+                        });
+                 } else{
+                    alert(err);
+                    console.log(err.name)
+                    return;
+                 }
+            } else{
+                cognitoUser = result.user;   
+                dispatch({type: "setUser", payload: cognitoUser.getUsername()}), [dispatch]
+                setModalVisible(!modalVisible)
+            }
+            
+            })
+
             } else if (err.name == "CodeMismatchException"){
                 alert("Incorrect code entered")
             }else{
@@ -85,7 +131,52 @@ export default function LoginScreen({navigation}) {
             }
             return
         },
-      }
+    }
+    const cognitoCallbacksSignIn = {
+        onSuccess: async function(result) {
+            
+            let idToken = result.getIdToken().getJwtToken();
+            let accessToken = result.getAccessToken().getJwtToken();
+
+            var smsMfaSettings = {
+                PreferredMfa: true,
+                Enabled: true,
+            };
+            console.log("mfa setting")
+            cognitoUser.setUserMfaPreference(smsMfaSettings, null, function(err, result) {
+                if (err) {
+                    alert(err.message || JSON.stringify(err));
+                }
+                console.log('call result ' + result);
+            });
+            console.log("mfa set")
+
+            try {
+                await EncryptedStorage.setItem(
+                    "user_session",
+                    JSON.stringify({
+                        idToken : idToken,
+                        accessToken : accessToken,
+                        username : phoneNumber,
+                    })
+                );
+        
+                // Congrats! You've just stored your first value!
+            } catch (error) {
+                // There was an error on the native side
+            }
+
+            dispatch({type: "setUser", payload: cognitoUser.getUsername()}), [dispatch]
+            
+
+            navigation.navigate("Age")
+
+        
+    },
+        onFailure: function(err) {
+            alert(err.message || JSON.stringify(err));
+        },
+    }
       
     return (
         // keyboard dismisser
@@ -137,13 +228,34 @@ export default function LoginScreen({navigation}) {
                                                 alert("please enter a valid phone number")
                                                 return
                                             }
-                                            cognitoUser.sendMFACode(verifyCode, cognitoCallbacks)}}
+                                            if (!signUp){
+                                                cognitoUser.sendMFACode(verifyCode, cognitoCallbacks)
+                                            } else {
+                                                setSignUp(false);
+                                                cognitoUser.confirmRegistration(verifyCode, true, function(err, result) {
+                                                    if (err) {
+                                                        alert(err.message || JSON.stringify(err));
+                                                        return;
+                                                    }
+                                                    console.log("registration succeess")
+                                                    var authenticationData = {
+                                                        Username: phoneNumber,
+                                                        Password: 'password',
+                                                    };
+                                                    var authenticationDetails = new AuthenticationDetails(authenticationData);
+                                                    cognitoUser.authenticateUser(authenticationDetails,  cognitoCallbacksSignIn);
+                                                    });
+
+                                            }
+                                           
+                                        
+                                        }}
                             >
 
                             <Text style={styles.buttonText}>enter</Text>
                             </Pressable>
                             <Pressable style = {styles.button} onPress={() => {
-                                setModalVisible(false)
+                                setModalVisible(!modalVisible)
                             }}>
                             <Text style = {styles.buttonText}>back</Text>
                             </Pressable>
@@ -248,13 +360,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginTop: 22
       },
-      code: {
-        width: SCREEN_WIDTH *0.75,
-        borderWidth: 1,
-        height: SCREEN_HEIGHT/15,
-        borderRadius: 15,
-        color: "#FDFDFD",
-    },
+      
 
         
 })

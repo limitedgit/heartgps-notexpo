@@ -4,6 +4,7 @@ import { Keyboard } from 'react-native';
 import { useDispatch } from 'react-redux';
 const SCREEN_HEIGHT = Dimensions.get('window').height
 const SCREEN_WIDTH = Dimensions.get('window').width
+import appStyles from '../../appstyles';
 
 
 
@@ -20,7 +21,7 @@ export default function NameScreen({navigation}) {
 
             
             <Text style = {styles.Title}>
-                Please enter your preferred name (will be displayed on your profile)
+                Please enter your preferred name (this will be displayed on your profile)
             </Text>
             <TextInput style = {styles.code} 
             onChangeText = {setName}
@@ -73,32 +74,6 @@ export default function NameScreen({navigation}) {
 }
 
 const styles = StyleSheet.create({
-    container :{
-        flex:1, 
-        flexDirection: 'column',
-        padding: 44,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    code: {
-        width: SCREEN_WIDTH *0.75,
-        borderWidth: 1,
-        height: SCREEN_HEIGHT/15,
-        fontSize: 20,
-        borderRadius: 15,
-    },
-    Title: {
-        fontSize: SCREEN_WIDTH/20,
-    }, button: {
-        padding: 10,
-        borderRadius: 15, 
-        borderWidth: 2,
-        backgroundColor: "black",
-        
-    },
-    buttonText: {
-        fontSize: 15,
-        color: 'white',
-    }
+    ...appStyles
         
 })
