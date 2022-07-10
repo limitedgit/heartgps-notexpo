@@ -8,6 +8,9 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import appStyles from '../../appstyles';
 //import Prompt from 'react-native-prompt';
 
+
+//THIS SCREEN ACCOUNTS FOR BOTH LOGIN AND SIGNUP
+// OTHER SIGNUP/LOGIN SCREENS ARE CURRENTLY UNUSED
 const SCREEN_HEIGHT = Dimensions.get('window').height
 const SCREEN_WIDTH = Dimensions.get('window').width
 const poolData = {
@@ -21,15 +24,17 @@ export default function LoginScreen({navigation}) {
 
     const [phoneNumber, ChangePhoneNumber] = useState(null);
     const phone = useRef(null);
+
     const dispatch = useDispatch()
-    const  [promptVisible, setPromptVisible] = useState(false);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [verifyCode, changeVerifyCode] = useState(null);
-    const [signUp, setSignUp] = useState(false);
+   // const  [promptVisible, setPromptVisible] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false); //pop up for code
+    const [verifyCode, changeVerifyCode] = useState(null); //code
+    const [signUp, setSignUp] = useState(false); //sign up or log in
     var attributeList = [];
 
-    const getUserdata = () => {
 
+    //This function should retrieve the data of an authorized user from the db
+    const getUserdata = () => {
         //TODO
         //fetch userdata from db
         return null;
@@ -132,6 +137,8 @@ export default function LoginScreen({navigation}) {
             return
         },
     }
+
+    //callback function for amazon cognito user sign in confirmation
     const cognitoCallbacksSignIn = {
         onSuccess: async function(result) {
             
@@ -167,17 +174,14 @@ export default function LoginScreen({navigation}) {
             }
 
             dispatch({type: "setUser", payload: cognitoUser.getUsername()}), [dispatch]
-            
-
             navigation.navigate("Age")
-
-        
     },
         onFailure: function(err) {
             alert(err.message || JSON.stringify(err));
         },
     }
       
+
     return (
         // keyboard dismisser
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -187,8 +191,6 @@ export default function LoginScreen({navigation}) {
             <Text style = {styles.text}>
             Enter your phone number (you will recieve a confirmation code)
             </Text>
-
-            
 
             {/* phone number input */}
             <PhoneInput 
@@ -205,6 +207,7 @@ export default function LoginScreen({navigation}) {
             
 
             <View style = {{alignItems: "center", justifyContent: "center"}}>
+                {/* POP UP FOR CODE */}
                     <Modal
                         animationType="slide"
                         transparent={true}
@@ -224,6 +227,8 @@ export default function LoginScreen({navigation}) {
                             <Pressable
                             style={[styles.button, styles.buttonClose]}
                             onPress={() => {
+
+                                           
                                             if (cognitoUser == null){
                                                 alert("please enter a valid phone number")
                                                 return
@@ -247,8 +252,6 @@ export default function LoginScreen({navigation}) {
                                                     });
 
                                             }
-                                           
-                                        
                                         }}
                             >
 
@@ -266,10 +269,11 @@ export default function LoginScreen({navigation}) {
                 
                 
 
-                {/* login button */}
+                {/* The ENTER button */}
                 <Pressable 
                     style = {styles.button}
                     onPress={() => {
+
                         if (phoneNumber == null){
                             alert("please enter a valid phone number")
                             return
@@ -287,17 +291,13 @@ export default function LoginScreen({navigation}) {
                    
                     let authenticationDetails = new AuthenticationDetails(authenticationData); 
                     dispatch({type: "setUser", payload: phoneNumber}), [dispatch]
-                    cognitoUser.authenticateUser(authenticationDetails, cognitoCallbacks);
-                   
-                   
+                    cognitoUser.authenticateUser(authenticationDetails, cognitoCallbacks);  
                 }}
                 > 
-
-
-                
                     <Text style = {styles.buttonText}> enter </Text>
                 </Pressable>
 
+                {/* another divider */}
                 <View style = {{height: SCREEN_HEIGHT*0.02}}/>
 
                 {/* <Prompt

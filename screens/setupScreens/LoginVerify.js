@@ -4,7 +4,10 @@ import {CognitoUserPool,CognitoUserAttribute,CognitoUser,AuthenticationDetails,}
 import {Pressable, View, Text, Button, StyleSheet, TextInput, TouchableWithoutFeedback, Dimensions} from 'react-native';
 import { Keyboard } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
+import AgeScreen from './AgeScreen';
 
+
+//THIS SCREEN IS CURRENTLY UNUSED  PLEASE DELETE
 const SCREEN_HEIGHT = Dimensions.get('window').height
 const SCREEN_WIDTH = Dimensions.get('window').width
 var poolData = {
@@ -105,6 +108,12 @@ export default function LoginVerifyScreen({ navigation }) {
             <Pressable 
             style = {styles.button}
             onPress={() => {
+
+                //dev skip
+                navigation.navigate("Age");
+                return
+
+
                 if (verifyCode == null){
                     alert("please enter the code you recieved through SMS")
                     return

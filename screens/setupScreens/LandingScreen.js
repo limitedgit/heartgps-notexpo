@@ -24,12 +24,12 @@ export default function LandingScreen({navigation}) {
             
 
                 {/* log in button */}
-                <Text style = {styles.text}>
+                {/* <Text style = {styles.text}>
                     Already have an account?
                 </Text>
                 <Pressable style = {styles.button} onPress={() => navigation.navigate("Login")}>
                     <Text style = {styles.buttonText}>Log in</Text>
-                </Pressable>
+                </Pressable> */}
 
 
                 {/* terms and conditions */}

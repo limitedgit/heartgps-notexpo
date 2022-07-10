@@ -14,7 +14,7 @@ var poolData = {
 var userPool = new CognitoUserPool(poolData);
 const region = "us-east-1";
 
-
+//NO LONGER IN USE PENDING DELETE
 export default function VerifyScreen({navigation}) {
     const user = useSelector((state) => state.user.currentUser)
     const [verifyCode, changeVerfiyCode] = useState(null);
@@ -27,7 +27,6 @@ export default function VerifyScreen({navigation}) {
     
     const cognitoCallbacks = {
         onSuccess: async function(result) {
-            console.log("fishbanes")
             
             let idToken = result.getIdToken().getJwtToken();
             let accessToken = result.getAccessToken().getJwtToken();

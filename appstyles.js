@@ -32,7 +32,8 @@ const appStyles = StyleSheet.create({
     Title: {
         fontSize: SCREEN_WIDTH/20,
         color: "#FDFDFD"
-    }, button: {
+    }, 
+    button: {
         padding: 10,
         borderRadius: 15, 
         borderWidth: 1,

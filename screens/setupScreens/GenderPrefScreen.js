@@ -90,7 +90,7 @@ export default function GenderPrefScreen({navigation}) {
                         await dispatch({type: "setGenderPref", payload: checked}),[dispatch]
                         storeProfileToDb();
                         console.log(JSON.stringify(profile))
-                        // navigation.navigate("Main")
+                         navigation.navigate("PhotoUpload")
                     }}
                 > 
                 <Text style = {styles.buttonText}> Next </Text>

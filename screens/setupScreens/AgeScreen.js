@@ -11,14 +11,11 @@ const SCREEN_WIDTH = Dimensions.get('window').width
 export default function AgeScreen({navigation}) {
     const [Age, setAge] = useState(null);
     const dispatch  = useDispatch();
-
-    
     return (
 
         // keyboard dismisser
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style = {styles.container}>
-
             
             <Text style = {styles.Title}>
                 Please enter your age

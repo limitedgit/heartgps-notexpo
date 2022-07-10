@@ -17,6 +17,7 @@ import LoginVerifyScreen from './setupScreens/LoginVerify';
 import GenderScreen from './setupScreens/GenderScreen';
 import GenderPrefScreen from './setupScreens/GenderPrefScreen';
 import NameScreen from './setupScreens/NameScreen';
+import PhotoUploadScreen from './setupScreens/PhotoUploadScreen';
 
 //location setup
 
@@ -43,9 +44,10 @@ export default function NavigationScreen() {
   
     return (
         <NavigationContainer theme={MyTheme}>
-        <Stack.Navigator    
+        <Stack.Navigator  
+         initialRouteName= {"PhotoUpload"}  
         // initialRouteName= {( isLoggedIn ? "Main" : "Landing")}
-        initialRouteName= {( user.currentUser ? "Main" : "Landing")}
+        //initialRouteName= {( user.currentUser ? "Main" : "Landing")}
         
         screenOptions={{
             headerShown: false,
@@ -64,6 +66,8 @@ export default function NavigationScreen() {
           <Stack.Screen name="Gender" component={GenderScreen} />
           <Stack.Screen name="GenderPref" component={GenderPrefScreen} />
           <Stack.Screen name="Name" component={NameScreen} />
+          <Stack.Screen name="PhotoUpload" component={PhotoUploadScreen}/>
+
         </Stack.Navigator>
         
       </NavigationContainer>
