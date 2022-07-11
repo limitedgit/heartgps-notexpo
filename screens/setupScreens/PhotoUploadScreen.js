@@ -1,32 +1,46 @@
 import React, {useState} from 'react'
-import {Image, View, Pressable, StyleSheet, Text, Dimensions} from "react-native"
+import {ImageBackground, Image, View, Pressable, StyleSheet, Text, Dimensions, TouchableOpacity} from "react-native"
 import appStyles from '../../appstyles'
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import { Icon } from 'react-native-elements'
 
 export default function PhotoUploadScreen({navigation}) {
-const [imageSource, changeImageSource] = useState([null,null,null]);
+const [imageSource, changeImageSource] = useState([]);
+
+
   //TODO FOR IOS ADD IMAGE PICKER KEYS TO INFOPLIST
+
+  const deletePhoto = (i) => {
+    changeImageSource(imageSource[i] = null)
+  }
   const renderImage = (i) => {
     if (imageSource[i] != null) {
+      console.log("yello")
       return (
         <View style = {styles.imageContainer}>
-            <Image style = {styles.image} source={{ uri: 'data:image/jpeg;base64,' + imageSource }}/>
+          
+            <ImageBackground style = {styles.image} source={(imageSource[i] != null ? { uri: String(imageSource[i]) } : require("../../images/placeholder.jpg") )}>
+            <TouchableOpacity onPress={ () => {deletePhoto(i)}}>
+            <Text style = {styles.text}> (X) </Text>
+            </TouchableOpacity>
+            </ImageBackground>
+          
           </View>
           )
     } else {
       return (
         <View style = {styles.imageContainer}>
-            <Image style = {styles.image} source={require("../../images/placeholder.jpg")}/>
+            <Image style = {styles.image} source={ require("../../images/placeholder.jpg") }/>
           </View>
           )
     }
-  }
+  } 
 
 
   return (
 
     <View style = {styles.container}>
-
+        
         <Text style = {styles.Title}>
           Please upload a few photos of yourself
         </Text>
@@ -43,7 +57,25 @@ const [imageSource, changeImageSource] = useState([null,null,null]);
         <View style = {{ flex: 0.1}}/>
 
         <Pressable style = {styles.button}
-        onPress = {() => launchCamera()}>
+        onPress = {() => 
+          {
+            if (imageSource.length >=4) {
+            alert("too many photos, delete one first to upload more")
+            return
+        }
+            launchCamera({mediaType: "photo", maxHeight: 640, maxWidth: 640}, (response) => {
+          if (response.errorCode){
+            console.log(response.errorMessage)
+          }  else if ( response.didCancel){
+            return
+          }else {
+            if (imageSource.length >=4) {
+              alert("too many photos, delete one first to upload more")
+              return
+          }
+            changeImageSource([...imageSource, response.assets[0].uri])
+          }
+        })}}>
           <Text style = {styles.buttonText}>
             take photo with camera
           </Text>
@@ -51,7 +83,26 @@ const [imageSource, changeImageSource] = useState([null,null,null]);
         <View style = {{ flex: 0.1}}/>
 
         <Pressable style = {styles.button}
-        onPress = {() => launchImageLibrary()}>
+        onPress =  {() => {
+          if (imageSource.length >=4) {
+            alert("too many photos, delete one first to upload more")
+            return
+        }
+          launchImageLibrary({mediaType: "photo", maxHeight: 640, maxWidth: 640}, (response) => {
+          if (response.errorCode){
+            console.log(response.errorMessage)
+          }  else if ( response.didCancel){
+            return
+          }else {
+
+            if (imageSource.length >=4) {
+                alert("too many photos, delete one first to upload more")
+                return
+            }
+            changeImageSource([...imageSource, response.assets[0].uri])
+            console.log("done")
+          }
+        })}}>
           <Text style = {styles.buttonText}>
             choose from photos
           </Text>
