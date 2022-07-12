@@ -11,21 +11,24 @@ const [imageSource, changeImageSource] = useState([]);
   //TODO FOR IOS ADD IMAGE PICKER KEYS TO INFOPLIST
 
   const deletePhoto = (i) => {
-    console.log(i)
     let photos = [...imageSource];
     photos.splice(i,1)
     changeImageSource(photos)
-    
   }
+
+  const upLoadPhotoBlob =  (blob) => {
+    //TODO 
+    //upload blob data to dynamodb through api call
+  }
+
   const renderImage = (i) => {
     if ((imageSource)[i] != null) {
-      console.log((imageSource) )
       return (
-        <View style = {styles.imageContainer}>
+        <View style = {styles.imageContainer}>  
           
-            <ImageBackground style = {styles.image} source={(imageSource[i] != null ? { uri: String(imageSource[i]) } : require("../../images/placeholder.jpg") )}>
+            <ImageBackground style = {styles.image} source={ { uri: String(imageSource[i]) }  }>
             <TouchableOpacity onPress={ () => {deletePhoto(i)}}>
-            <Text style = {styles.text}> (X) </Text>
+              <Icon style = {{top: 0  , left: 0, height: 30, width: 30, }} name = "delete" backgroundColor={"#ff0D0D"}/>
             </TouchableOpacity>
             </ImageBackground>
           
@@ -48,7 +51,9 @@ const [imageSource, changeImageSource] = useState([]);
         <Text style = {styles.Title}>
           Please upload a few photos of yourself
         </Text>
+
         <View style = {{ flex: 0.2}}/>
+        
         <View style = {styles.imageContainerContainer}>
           {renderImage(0)}
           {renderImage(1)}
@@ -64,22 +69,22 @@ const [imageSource, changeImageSource] = useState([]);
         onPress = {() => 
           {
             if (imageSource.length >=4) {
-            alert("too many photos, delete one first to upload more")
-            return
-        }
-            launchCamera({mediaType: "photo", maxHeight: 640, maxWidth: 640}, (response) => {
-          if (response.errorCode){
-            console.log(response.errorMessage)
-          }  else if ( response.didCancel){
-            return
-          }else {
-            if (imageSource.length >=4) {
-              alert("too many photos, delete one first to upload more")
+              alert("too many photos, delete a photo first to upload more \n (to delete tap red icon on photo)")
               return
-          }
-            changeImageSource([...imageSource, response.assets[0].uri])
-          }
-        })}}>
+            }
+              launchCamera({mediaType: "photo", maxHeight: 640, maxWidth: 640}, (response) => {
+            if (response.errorCode){
+              console.log(response.errorMessage)
+            }  else if ( response.didCancel){
+              return
+            }else {
+              if (imageSource.length >=4) {
+                return
+              }
+              changeImageSource([...imageSource, response.assets[0].uri])
+            }
+            })
+          }}>
           <Text style = {styles.buttonText}>
             take photo with camera
           </Text>
@@ -88,32 +93,47 @@ const [imageSource, changeImageSource] = useState([]);
 
         <Pressable style = {styles.button}
         onPress =  {() => {
-          if (imageSource.length >=4) {
-            alert("too many photos, delete one first to upload more")
-            return
-        }
-          launchImageLibrary({mediaType: "photo", maxHeight: 640, maxWidth: 640}, (response) => {
-          if (response.errorCode){
-            console.log(response.errorMessage)
-          }  else if ( response.didCancel){
-            return
-          }else {
-
             if (imageSource.length >=4) {
-                alert("too many photos, delete one first to upload more")
-                return
+              alert("too many photos, delete a photo first to upload more \n (to delete tap red icon on photo)")
+              return
             }
-            changeImageSource([...imageSource, response.assets[0].uri])
-            console.log("done")
-          }
+            launchImageLibrary({mediaType: "photo", maxHeight: 640, maxWidth: 640}, (response) => {
+            if (response.errorCode){
+              console.log(response.errorMessage)
+            }  else if ( response.didCancel){
+              return
+            }else {
+
+              if (imageSource.length >=4) {
+                  return
+              }
+              changeImageSource([...imageSource, response.assets[0].uri])
+              console.log("done")
+            }
         })}}>
           <Text style = {styles.buttonText}>
-            choose from photos
+            choose from image library
           </Text>
         </Pressable>
         <View style = {{ flex: 0.1}}/>
-        
 
+        <View style = {{flex: 0.2}}/>
+        
+        <Pressable style = {styles.button} onPress = {() => {
+          if (imageSource.length > 0) {
+          imageSource.forEach( async (uri) => {
+            const response = await fetch(uri);
+            const blob = await response.blob();
+            upLoadPhotoBlob(blob);
+           
+          })
+        } else {
+          alert("please choose at least one photo to upload")
+        }
+        }}>
+          <Text style = {styles.buttonText}> continue</Text>
+           
+        </Pressable>
 
         <Pressable style = {styles.button} onPress = {() => {
           console.log(imageSource)
@@ -126,6 +146,7 @@ const [imageSource, changeImageSource] = useState([]);
   )
 }
 
+
 const styles = StyleSheet.create({
     ...appStyles,
     image:{
@@ -136,8 +157,6 @@ const styles = StyleSheet.create({
  
         resizeMode: "center",
         padding: 20,
-
-
     },
     imageContainerContainer:{
       flexDirection: "row",
