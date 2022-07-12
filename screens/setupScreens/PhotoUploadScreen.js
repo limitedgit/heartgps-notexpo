@@ -11,11 +11,15 @@ const [imageSource, changeImageSource] = useState([]);
   //TODO FOR IOS ADD IMAGE PICKER KEYS TO INFOPLIST
 
   const deletePhoto = (i) => {
-    changeImageSource(imageSource[i] = null)
+    console.log(i)
+    let photos = [...imageSource];
+    photos.splice(i,1)
+    changeImageSource(photos)
+    
   }
   const renderImage = (i) => {
-    if (imageSource[i] != null) {
-      console.log("yello")
+    if ((imageSource)[i] != null) {
+      console.log((imageSource) )
       return (
         <View style = {styles.imageContainer}>
           
