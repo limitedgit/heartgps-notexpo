@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import appStyles from '../../appstyles';
 //import Prompt from 'react-native-prompt';
-
+const uploadLink = "https://ez7z5iatzl.execute-api.us-east-1.amazonaws.com/Prod/uploads";
 
 //THIS SCREEN ACCOUNTS FOR BOTH LOGIN AND SIGNUP
 // OTHER SIGNUP/LOGIN SCREENS ARE CURRENTLY UNUSED
@@ -79,8 +79,7 @@ export default function LoginScreen({navigation}) {
             // } catch (error) {
             //     // There was an error on the native side
             // }
-            storeUserAuthData(accessToken, idToken, phoneNumber);
-            console.log(accessToken)
+            storeUserAuthData(idToken, accessToken, phoneNumber);
             dispatch({type: "setUser", payload: cognitoUser.getUsername()}), [dispatch]
 
             let userData = await getUserdata();
@@ -193,7 +192,7 @@ export default function LoginScreen({navigation}) {
             //     return
             //     // There was an error on the native side
             // }
-            storeUserAuthData(accessToken, idToken, phoneNumber);
+            storeUserAuthData(idToken, accessToken, phoneNumber);
 
             dispatch({type: "setUser", payload: cognitoUser.getUsername()}), [dispatch]
             navigation.navigate("Age")

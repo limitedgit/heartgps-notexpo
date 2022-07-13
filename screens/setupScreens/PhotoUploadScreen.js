@@ -7,7 +7,7 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 
 export default function PhotoUploadScreen({navigation}) {
 const [imageSource, changeImageSource] = useState([]);
-
+const uploadLink = "https://ez7z5iatzl.execute-api.us-east-1.amazonaws.com/Prod/uploads";
 
   //TODO FOR IOS ADD IMAGE PICKER KEYS TO INFOPLIST
 
@@ -17,12 +17,38 @@ const [imageSource, changeImageSource] = useState([]);
     changeImageSource(photos)
   }
 
-  const upLoadPhotoURI =  async (uri) => {
+  const upLoadPhotoURI =  async (blob, i) => {
     //TODO 
     //upload blob data to dynamodb through api call
-    console.log(uri)
     const session = await EncryptedStorage.getItem("user_session");
-    console.log(JSON.parse(session).idToken)
+    const idToken = (JSON.parse(session).idToken);
+    // console.log(String(idToken));
+    
+    let bodyData = {
+      uid : "fakeuser",
+      photoNum : 1
+    }
+    let result = await fetch(uploadLink, {
+      method: 'POST',
+      // mode: 'cors',
+      headers: {
+        'Content-Type': 'text/plain',
+        "Authorization": idToken
+      },
+      body: JSON.stringify(bodyData)
+    })
+    result = await result.json()
+    console.log("result: ", result)
+    let signedURL = result.uploadURL;
+    console.log("url ", signedURL)
+
+    let blobData = blob;
+    const result2 = await fetch(signedURL, {
+      method: 'PUT',
+      body: blobData
+    })
+
+
     
   }
   const uploadProfile = () => {
@@ -131,13 +157,16 @@ const [imageSource, changeImageSource] = useState([]);
         
         <Pressable style = {styles.button} onPress = {() => {
           if (imageSource.length > 0) {
-          imageSource.forEach( async (uri) => {
+          imageSource.forEach( async (uri, i) => {
             try {
-              await upLoadPhotoURI(uri);
+              const result = await fetch(uri);
+              const blob = await result.blob(); 
+              await upLoadPhotoURI(blob, i);
               await uploadProfile();
 
             } catch (err){
               alert("something went wrong, please try again later")
+              console.log(err)
             }
            
           })
