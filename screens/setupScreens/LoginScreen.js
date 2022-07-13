@@ -40,6 +40,22 @@ export default function LoginScreen({navigation}) {
         return null;
     }
 
+    //stores access tokens
+    const storeUserAuthData= async (idToken, accessToken, username) => {
+        try {
+            await EncryptedStorage.setItem(
+                "user_session",
+                JSON.stringify({
+                    idToken : idToken,
+                    accessToken : accessToken,
+                    username : username,
+                })
+            );
+        } catch (error) {
+            // There was an error on the native side
+        }
+    }
+
     //callback function for amazon cognito user login
     const cognitoCallbacks = {
         mfaRequired: function(err) {
@@ -51,25 +67,29 @@ export default function LoginScreen({navigation}) {
             let accessToken = result.getAccessToken().getJwtToken();
             // console.log(`result: ${JSON.stringify(result)}`)
             // console.log(`myAccessToken: ${JSON.stringify(result.getAccessToken())}`)
-            try {
-                await EncryptedStorage.setItem(
-                    "user_session",
-                    JSON.stringify({
-                        idToken : idToken,
-                        accessToken : accessToken,
-                        username : phoneNumber,
-                    })
-                );
-            } catch (error) {
-                // There was an error on the native side
-            }
+            // try {
+            //     await EncryptedStorage.setItem(
+            //         "user_session",
+            //         JSON.stringify({
+            //             idToken : idToken,
+            //             accessToken : accessToken,
+            //             username : phoneNumber,
+            //         })
+            //     );
+            // } catch (error) {
+            //     // There was an error on the native side
+            // }
+            storeUserAuthData(accessToken, idToken, phoneNumber);
             console.log(accessToken)
             dispatch({type: "setUser", payload: cognitoUser.getUsername()}), [dispatch]
 
             let userData = await getUserdata();
+
             if (userData == null){
+                setModalVisible(false)
                 navigation.navigate("Age")
             } else {
+                setModalVisible(false)
                 navigation.navigate("Main")
             }
             
@@ -94,8 +114,7 @@ export default function LoginScreen({navigation}) {
                     err,
                     result
                 ){
-                    if (err) {
-                    
+                if (err) {
                         if (err.name == "UsernameExistsException" ){
                             let userData = {
                                 Username: phoneNumber,
@@ -116,11 +135,11 @@ export default function LoginScreen({navigation}) {
                             // navigation.navigate("Verify")
                             setModalVisible(!modalVisible)
                         });
-                 } else{
-                    alert(err);
-                    console.log(err.name)
-                    return;
-                 }
+                        } else{
+                            alert(err);
+                            console.log(err.name)
+                            return;
+                         }
             } else{
                 cognitoUser = result.user;   
                 dispatch({type: "setUser", payload: cognitoUser.getUsername()}), [dispatch]
@@ -149,29 +168,32 @@ export default function LoginScreen({navigation}) {
                 PreferredMfa: true,
                 Enabled: true,
             };
-            console.log("mfa setting")
+            
             cognitoUser.setUserMfaPreference(smsMfaSettings, null, function(err, result) {
                 if (err) {
                     alert(err.message || JSON.stringify(err));
                 }
                 console.log('call result ' + result);
             });
-            console.log("mfa set")
+           
 
-            try {
-                await EncryptedStorage.setItem(
-                    "user_session",
-                    JSON.stringify({
-                        idToken : idToken,
-                        accessToken : accessToken,
-                        username : phoneNumber,
-                    })
-                );
+            // try {
+            //     await EncryptedStorage.setItem(
+            //         "user_session",
+            //         JSON.stringify({
+            //             idToken : idToken,
+            //             accessToken : accessToken,
+            //             username : phoneNumber,
+            //         })
+            //     );
         
-                // Congrats! You've just stored your first value!
-            } catch (error) {
-                // There was an error on the native side
-            }
+            //     // Congrats! You've just stored your first value!
+            // } catch (error) {
+            //     alert("key storage error, please try again later")
+            //     return
+            //     // There was an error on the native side
+            // }
+            storeUserAuthData(accessToken, idToken, phoneNumber);
 
             dispatch({type: "setUser", payload: cognitoUser.getUsername()}), [dispatch]
             navigation.navigate("Age")
@@ -228,21 +250,23 @@ export default function LoginScreen({navigation}) {
                             style={[styles.button, styles.buttonClose]}
                             onPress={() => {
 
-                                           
+                                            //if the user didnt enter their phone number
                                             if (cognitoUser == null){
                                                 alert("please enter a valid phone number")
                                                 return
                                             }
+                                            
                                             if (!signUp){
+                                                //if the user already has an account
                                                 cognitoUser.sendMFACode(verifyCode, cognitoCallbacks)
                                             } else {
+                                                //if the user does not have an account
                                                 setSignUp(false);
                                                 cognitoUser.confirmRegistration(verifyCode, true, function(err, result) {
                                                     if (err) {
                                                         alert(err.message || JSON.stringify(err));
                                                         return;
                                                     }
-                                                    console.log("registration succeess")
                                                     var authenticationData = {
                                                         Username: phoneNumber,
                                                         Password: 'password',

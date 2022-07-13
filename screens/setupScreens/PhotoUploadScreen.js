@@ -3,6 +3,7 @@ import {ImageBackground, Image, View, Pressable, StyleSheet, Text, Dimensions, T
 import appStyles from '../../appstyles'
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import { Icon } from 'react-native-elements'
+import EncryptedStorage from 'react-native-encrypted-storage';
 
 export default function PhotoUploadScreen({navigation}) {
 const [imageSource, changeImageSource] = useState([]);
@@ -16,20 +17,24 @@ const [imageSource, changeImageSource] = useState([]);
     changeImageSource(photos)
   }
 
-  const upLoadPhotoBlob =  (blob) => {
+  const upLoadPhotoURI =  async (uri) => {
     //TODO 
     //upload blob data to dynamodb through api call
+    console.log(uri)
+    const session = await EncryptedStorage.getItem("user_session");
+    console.log(JSON.parse(session).idToken)
+    
   }
   const uploadProfile = () => {
     //TODO
     //upload profile from redux
   }
 
+  //renders each of the photos on display or a placeholder image
   const renderImage = (i) => {
     if ((imageSource)[i] != null) {
       return (
         <View style = {styles.imageContainer}>  
-          
             <ImageBackground style = {styles.image} source={ { uri: String(imageSource[i]) }  }>
             <TouchableOpacity onPress={ () => {deletePhoto(i)}}>
               <Icon style = {{top: 0  , left: 0, height: 30, width: 30, }} name = "delete" backgroundColor={"#ff0D0D"}/>
@@ -67,6 +72,7 @@ const [imageSource, changeImageSource] = useState([]);
           {renderImage(2)}
           {renderImage(3)}
         </View>
+
         <View style = {{ flex: 0.1}}/>
 
         <Pressable style = {styles.button}
@@ -127,11 +133,9 @@ const [imageSource, changeImageSource] = useState([]);
           if (imageSource.length > 0) {
           imageSource.forEach( async (uri) => {
             try {
-              const response = await fetch(uri);
-              const blob = await response.blob();
-              await upLoadPhotoBlob(blob);
+              await upLoadPhotoURI(uri);
               await uploadProfile();
-              
+
             } catch (err){
               alert("something went wrong, please try again later")
             }

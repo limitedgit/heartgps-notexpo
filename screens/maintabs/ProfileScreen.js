@@ -7,7 +7,7 @@ import { Icon } from 'react-native-elements'
 
 export default function ProfileScreen({navigation}) {
     imageSource =  require("../../images/smile-person2.jpeg");
-
+    
     const [modalVisible, setModalVisible] = useState(false);
     return (
         <SafeAreaView style = {styles.container}>
