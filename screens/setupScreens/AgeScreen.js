@@ -34,10 +34,15 @@ export default function AgeScreen({navigation}) {
                 onPress={
 
                     () => {
+                        if (Age == null || Age == "") {
+                            alert("please enter your age")
+                            return 
+                        }
                         if (parseInt(Age) < 18){
                             alert("you must be 18 or older to use this app, please come back later")
                             return
                         }
+                
                         dispatch({type: "setAge", payload: Age}), [dispatch]
 
                         

@@ -20,6 +20,10 @@ const [imageSource, changeImageSource] = useState([]);
     //TODO 
     //upload blob data to dynamodb through api call
   }
+  const uploadProfile = () => {
+    //TODO
+    //upload profile from redux
+  }
 
   const renderImage = (i) => {
     if ((imageSource)[i] != null) {
@@ -122,9 +126,15 @@ const [imageSource, changeImageSource] = useState([]);
         <Pressable style = {styles.button} onPress = {() => {
           if (imageSource.length > 0) {
           imageSource.forEach( async (uri) => {
-            const response = await fetch(uri);
-            const blob = await response.blob();
-            upLoadPhotoBlob(blob);
+            try {
+              const response = await fetch(uri);
+              const blob = await response.blob();
+              await upLoadPhotoBlob(blob);
+              await uploadProfile();
+              
+            } catch (err){
+              alert("something went wrong, please try again later")
+            }
            
           })
         } else {
@@ -154,7 +164,6 @@ const styles = StyleSheet.create({
       width:150,
     },
     imageContainer: {
- 
         resizeMode: "center",
         padding: 20,
     },
