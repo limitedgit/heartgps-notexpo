@@ -5,7 +5,7 @@ import org.apache.tools.ant.taskdefs.condition.Os
 buildscript {
     ext {
         buildToolsVersion = "31.0.0"
-        minSdkVersion = 21
+        minSdkVersion = 27  
         compileSdkVersion = 31
         targetSdkVersion = 31
 
@@ -36,6 +36,11 @@ allprojects {
             // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
             url("$rootDir/../node_modules/react-native/android")
         }
+        //  // image crop picker
+        // maven { url 'https://maven.google.com' }
+
+        // // image crop picker
+        // maven { url "https://www.jitpack.io" }
         maven {
             // Android JSC is installed from npm
             url("$rootDir/../node_modules/jsc-android/dist")

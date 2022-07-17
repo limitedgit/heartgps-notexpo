@@ -7,7 +7,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import appStyles from '../../appstyles';
 //import Prompt from 'react-native-prompt';
-const uploadLink = "https://ez7z5iatzl.execute-api.us-east-1.amazonaws.com/Prod/uploads";
+
 
 //THIS SCREEN ACCOUNTS FOR BOTH LOGIN AND SIGNUP
 // OTHER SIGNUP/LOGIN SCREENS ARE CURRENTLY UNUSED
@@ -26,7 +26,6 @@ export default function LoginScreen({navigation}) {
     const phone = useRef(null);
 
     const dispatch = useDispatch()
-   // const  [promptVisible, setPromptVisible] = useState(false);
     const [modalVisible, setModalVisible] = useState(false); //pop up for code
     const [verifyCode, changeVerifyCode] = useState(null); //code
     const [signUp, setSignUp] = useState(false); //sign up or log in
@@ -41,13 +40,14 @@ export default function LoginScreen({navigation}) {
     }
 
     //stores access tokens
-    const storeUserAuthData= async (idToken, accessToken, username) => {
+    const storeUserAuthData= async (idToken, accessToken, refreshToken, username) => {
         try {
             await EncryptedStorage.setItem(
                 "user_session",
                 JSON.stringify({
                     idToken : idToken,
                     accessToken : accessToken,
+                    refreshToken: refreshToken,
                     username : username,
                 })
             );
@@ -63,27 +63,13 @@ export default function LoginScreen({navigation}) {
         },
         onSuccess: async function(result) {
             console.log("success")
+        
             let idToken = result.getIdToken().getJwtToken();
             let accessToken = result.getAccessToken().getJwtToken();
-            // console.log(`result: ${JSON.stringify(result)}`)
-            // console.log(`myAccessToken: ${JSON.stringify(result.getAccessToken())}`)
-            // try {
-            //     await EncryptedStorage.setItem(
-            //         "user_session",
-            //         JSON.stringify({
-            //             idToken : idToken,
-            //             accessToken : accessToken,
-            //             username : phoneNumber,
-            //         })
-            //     );
-            // } catch (error) {
-            //     // There was an error on the native side
-            // }
-            storeUserAuthData(idToken, accessToken, phoneNumber);
+            let refreshToken = result.refreshToken.token;
+            storeUserAuthData(idToken, accessToken, refreshToken, phoneNumber);
             dispatch({type: "setUser", payload: cognitoUser.getUsername()}), [dispatch]
-
             let userData = await getUserdata();
-
             if (userData == null){
                 setModalVisible(false)
                 navigation.navigate("Age")
@@ -162,6 +148,7 @@ export default function LoginScreen({navigation}) {
             
             let idToken = result.getIdToken().getJwtToken();
             let accessToken = result.getAccessToken().getJwtToken();
+            let refreshToken = result.refreshToken.token;
 
             var smsMfaSettings = {
                 PreferredMfa: true,
@@ -172,27 +159,8 @@ export default function LoginScreen({navigation}) {
                 if (err) {
                     alert(err.message || JSON.stringify(err));
                 }
-                console.log('call result ' + result);
             });
-           
-
-            // try {
-            //     await EncryptedStorage.setItem(
-            //         "user_session",
-            //         JSON.stringify({
-            //             idToken : idToken,
-            //             accessToken : accessToken,
-            //             username : phoneNumber,
-            //         })
-            //     );
-        
-            //     // Congrats! You've just stored your first value!
-            // } catch (error) {
-            //     alert("key storage error, please try again later")
-            //     return
-            //     // There was an error on the native side
-            // }
-            storeUserAuthData(idToken, accessToken, phoneNumber);
+            storeUserAuthData(idToken, accessToken, refreshToken, phoneNumber);
 
             dispatch({type: "setUser", payload: cognitoUser.getUsername()}), [dispatch]
             navigation.navigate("Age")
@@ -322,14 +290,6 @@ export default function LoginScreen({navigation}) {
 
                 {/* another divider */}
                 <View style = {{height: SCREEN_HEIGHT*0.02}}/>
-
-                {/* <Prompt
-                    title="Enter Verification code sent to SMS"
-                    placeholder="999999"
-                    defaultValue=""
-                    visible={ promptVisible }
-                    onCancel={() => setPromptVisible()}
-                    onSubmit={ () => setPromptVisible() }/> */}
             
                 
                 {/* back button */}
@@ -354,13 +314,6 @@ export default function LoginScreen({navigation}) {
 const styles = StyleSheet.create({
     ...appStyles,
     
-    // areaCodeInput: {
-    //     flex: 0.2, 
-    //     borderWidth: 1,
-    //     fontSize: SCREEN_HEIGHT/30,
-    //     borderRadius: 15,
-    // }, 
- 
 
     modalView: {
         margin: 20,

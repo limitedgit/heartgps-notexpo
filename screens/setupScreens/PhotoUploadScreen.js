@@ -2,14 +2,22 @@ import React, {useState} from 'react'
 import {ImageBackground, Image, View, Pressable, StyleSheet, Text, Dimensions, TouchableOpacity} from "react-native"
 import appStyles from '../../appstyles'
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+
 import { Icon } from 'react-native-elements'
 import EncryptedStorage from 'react-native-encrypted-storage';
+import {CognitoUserPool,CognitoUserAttribute,CognitoUser,AuthenticationDetails,} from 'amazon-cognito-identity-js';
+import * as AWS from 'aws-sdk/global';
 
 export default function PhotoUploadScreen({navigation}) {
 const [imageSource, changeImageSource] = useState([]);
 const uploadLink = "https://ez7z5iatzl.execute-api.us-east-1.amazonaws.com/Prod/uploads";
+const poolData = {
+  UserPoolId: 'us-east-1_ruYdvZa9g', // Your user pool id here
+  ClientId: 'q62on7a2t5hac9l2re48kg2j6', // Your client id here
+};
+const userPool = new CognitoUserPool(poolData);
 
-  //TODO FOR IOS ADD IMAGE PICKER KEYS TO INFOPLIST
+  //TODO FOR IOS ADD IMAGE PICKER KEYS TO INFOPLIST NSPhotoLibraryUsageDescription
 
   const deletePhoto = (i) => {
     let photos = [...imageSource];
@@ -17,17 +25,65 @@ const uploadLink = "https://ez7z5iatzl.execute-api.us-east-1.amazonaws.com/Prod/
     changeImageSource(photos)
   }
 
-  const upLoadPhotoURI =  async (blob, i) => {
-    //TODO 
-    //upload blob data to dynamodb through api call
-    const session = await EncryptedStorage.getItem("user_session");
-    const idToken = (JSON.parse(session).idToken);
-    // console.log(String(idToken));
+
+  const refreshTokens = async () => {
+      const session = await EncryptedStorage.getItem("user_session");
+      //if there is no session user needs to re-login
+      if (session == null){
+        alert("please log in again")
+        navigation.navigate("Landing");
+        return 
+      }
+      //get idtoken stored in session
+      //use built in check needs Refresh function
+      const refresh_token = (JSON.parse(session).refreshToken);
+      const refreshTokenGetter = {
+        getToken: function(){
+          return refresh_token;
+        }
+      }
+      const username = (JSON.parse(session).username);
+      let userData = {
+        Username: username,
+        Pool: userPool,
+      };
+      const cognitoUser = new CognitoUser(userData);
+      cognitoUser.refreshSession(refreshTokenGetter, async (err, result) => {
+        if (err) {
+          console.log(err);
+        } else if (result.status == 200) {
+          //refresh the token and store it in user_session
+          let accessToken = result.getAccessToken().getJwtToken();
+          let idToken = result.getAccessToken().getJwtToken();
+          await EncryptedStorage.setItem(
+            "user_session",
+            JSON.stringify({
+                idToken : idToken,
+                accessToken : accessToken,
+                refreshToken: refresh_token,
+                username : username,
+            })
+          );
+        } else {
+          alert("login has expired, please login again")
+          navigation.navigate("Landing");
+          return
+        }
+      });
     
+
+  }
+
+  const upLoadPhotoBlob =  async (blob, i) => {
+
+    //in case the user takes way too long to upload photo 
+
     let bodyData = {
-      uid : "fakeuser",
-      photoNum : 1
+      photoNum : i,
+      fileType: blob._data.type,
     }
+    let session = await EncryptedStorage.getItem("user_session");
+    let idToken = (JSON.parse(session).idToken);
     let result = await fetch(uploadLink, {
       method: 'POST',
       // mode: 'cors',
@@ -38,15 +94,40 @@ const uploadLink = "https://ez7z5iatzl.execute-api.us-east-1.amazonaws.com/Prod/
       body: JSON.stringify(bodyData)
     })
     result = await result.json()
-    console.log("result: ", result)
-    let signedURL = result.uploadURL;
-    console.log("url ", signedURL)
+    if (result.status != 401){
+      let signedURL = result.uploadURL;
+      let blobData = blob;
+      let result2 = await fetch(signedURL, {
+        method: 'PUT',
+        body: blobData
+      })
+      console.log("success")
+    } else {
+      console.log("token expired")
+      await refreshTokens();
+      let session = await EncryptedStorage.getItem("user_session");
+      let idToken = (JSON.parse(session).idToken);
+      let result = await fetch(uploadLink, {
+      method: 'POST',
+      // mode: 'cors',
+      headers: {
+        'Content-Type': 'text/plain',
+        "Authorization": idToken
+      },
+      body: JSON.stringify(bodyData)
+      })
+      let signedURL = result.uploadURL;
+        let blobData = blob;
+        let result2 = await fetch(signedURL, {
+          method: 'PUT',
+          body: blobData
+        })
+        console.log("success")
+      
 
-    let blobData = blob;
-    const result2 = await fetch(signedURL, {
-      method: 'PUT',
-      body: blobData
-    })
+    } 
+
+    
 
 
     
@@ -161,7 +242,7 @@ const uploadLink = "https://ez7z5iatzl.execute-api.us-east-1.amazonaws.com/Prod/
             try {
               const result = await fetch(uri);
               const blob = await result.blob(); 
-              await upLoadPhotoURI(blob, i);
+              await upLoadPhotoBlob(blob, i);
               await uploadProfile();
 
             } catch (err){
