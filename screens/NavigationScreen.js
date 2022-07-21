@@ -42,7 +42,7 @@ export default function NavigationScreen() {
     return (
         <NavigationContainer theme={MyTheme}>
         <Stack.Navigator  
-        //initialRouteName= {"PhotoUpload"}  
+        initialRouteName= {"PhotoUpload"}  
         // initialRouteName= {( isLoggedIn ? "Main" : "Landing")}
         //initialRouteName= {( user.currentUser ? "Main" : "Landing")}
         

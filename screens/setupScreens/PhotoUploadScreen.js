@@ -26,17 +26,21 @@ const userPool = new CognitoUserPool(poolData);
   }
 
 
-  const refreshTokens = async () => {
+  const refreshTokens = async (blob, i) => {
+
       const session = await EncryptedStorage.getItem("user_session");
       //if there is no session user needs to re-login
-      if (session == null){
+      const refresh_token = (JSON.parse(session).refreshToken);
+  
+      if (refresh_token == null){
+        console.log("null refresh token")
         alert("please log in again")
         navigation.navigate("Landing");
         return 
       }
       //get idtoken stored in session
       //use built in check needs Refresh function
-      const refresh_token = (JSON.parse(session).refreshToken);
+      
       const refreshTokenGetter = {
         getToken: function(){
           return refresh_token;
@@ -48,13 +52,22 @@ const userPool = new CognitoUserPool(poolData);
         Pool: userPool,
       };
       const cognitoUser = new CognitoUser(userData);
+      console.log(cognitoUser)
       cognitoUser.refreshSession(refreshTokenGetter, async (err, result) => {
+        var accessToken;
+        var idToken;
+        console.log(result)
+        try {
+          accessToken = result.getAccessToken().getJwtToken();
+        } catch (err) {
+            console.log(err)
+            return
+        }
         if (err) {
           console.log(err);
-        } else if (result.status == 200) {
+        } else if (accessToken != null) {
           //refresh the token and store it in user_session
-          let accessToken = result.getAccessToken().getJwtToken();
-          let idToken = result.getAccessToken().getJwtToken();
+          console.log(result)
           await EncryptedStorage.setItem(
             "user_session",
             JSON.stringify({
@@ -64,6 +77,26 @@ const userPool = new CognitoUserPool(poolData);
                 username : username,
             })
           );
+
+          let result = await fetch(uploadLink, {
+            method: 'POST',
+            // mode: 'cors',
+            headers: {
+              'Content-Type': 'text/plain',
+              "Authorization": idToken
+            },
+            body: JSON.stringify(bodyData)
+            })
+            
+            result = await result.json();
+            console.log(result)
+            let signedURL = result.uploadURL;
+            let blobData = blob;
+            let result2 = await fetch(signedURL, {
+                method: 'PUT',
+                body: blobData
+            })
+          
         } else {
           alert("login has expired, please login again")
           navigation.navigate("Landing");
@@ -76,14 +109,18 @@ const userPool = new CognitoUserPool(poolData);
 
   const upLoadPhotoBlob =  async (blob, i) => {
 
-    //in case the user takes way too long to upload photo 
-
     let bodyData = {
       photoNum : i,
       fileType: blob._data.type,
     }
     let session = await EncryptedStorage.getItem("user_session");
-    let idToken = (JSON.parse(session).idToken);
+    if (session == null) {
+      console.log("null user sesssion")
+      alert("please log in again")
+        navigation.navigate("Landing");
+        return 
+    }
+    let idToken = await (JSON.parse(session).idToken);
     let result = await fetch(uploadLink, {
       method: 'POST',
       // mode: 'cors',
@@ -93,37 +130,91 @@ const userPool = new CognitoUserPool(poolData);
       },
       body: JSON.stringify(bodyData)
     })
+    const resultStatusCode  = result.status;
     result = await result.json()
-    if (result.status != 401){
+   
+    if (resultStatusCode != 401){
       let signedURL = result.uploadURL;
       let blobData = blob;
       let result2 = await fetch(signedURL, {
         method: 'PUT',
         body: blobData
       })
-      console.log("success")
+
     } else {
+
+
       console.log("token expired")
-      await refreshTokens();
-      let session = await EncryptedStorage.getItem("user_session");
-      let idToken = (JSON.parse(session).idToken);
-      let result = await fetch(uploadLink, {
-      method: 'POST',
-      // mode: 'cors',
-      headers: {
-        'Content-Type': 'text/plain',
-        "Authorization": idToken
-      },
-      body: JSON.stringify(bodyData)
-      })
-      let signedURL = result.uploadURL;
-        let blobData = blob;
-        let result2 = await fetch(signedURL, {
-          method: 'PUT',
-          body: blobData
-        })
-        console.log("success")
+      //await refreshTokens(blob, i);
       
+      const session = await EncryptedStorage.getItem("user_session");
+      //if there is no session user needs to re-login
+      const refresh_token = (JSON.parse(session).refreshToken);
+  
+      if (refresh_token == null){
+        console.log("null refresh token")
+        alert("please log in again")
+        navigation.navigate("Landing");
+        return 
+      }
+      //get idtoken stored in session
+      //use built in check needs Refresh function
+      
+      const refreshTokenGetter = {
+        getToken: function(){
+          return refresh_token;
+        }
+      }
+      const username = (JSON.parse(session).username);
+      let userData = {
+        Username: username,
+        Pool: userPool,
+      };
+      const cognitoUser = new CognitoUser(userData);
+      cognitoUser.refreshSession(refreshTokenGetter, async (err, result) => {
+        var accessToken = result.getAccessToken().getJwtToken();
+        var idToken = result.getIdToken().getJwtToken();
+  
+        if (err) {
+          console.log("err getting result: ", err);
+        } else if (accessToken != null) {
+          //refresh the token and store it in user_session
+          console.log(result)
+          await EncryptedStorage.setItem(
+            "user_session",
+            JSON.stringify({
+                idToken : idToken,
+                accessToken : accessToken,
+                refreshToken: refresh_token,
+                username : username,
+            })
+          );
+
+          let result = await fetch(uploadLink, {
+            method: 'POST',
+            // mode: 'cors',
+            headers: {
+              'Content-Type': 'text/plain',
+              "Authorization": idToken
+            },
+            body: JSON.stringify(bodyData)
+            })
+            
+            result = await result.json();
+            console.log(result)
+            let signedURL = result.uploadURL;
+            let blobData = blob;
+            let result2 = await fetch(signedURL, {
+                method: 'PUT',
+                body: blobData
+            })
+          
+        } else {
+          alert("login has expired, please login again")
+          navigation.navigate("Landing");
+          return
+        }
+      });
 
     } 
 
@@ -237,6 +328,7 @@ const userPool = new CognitoUserPool(poolData);
         <View style = {{flex: 0.2}}/>
         
         <Pressable style = {styles.button} onPress = {() => {
+          console.log('pressed continue')
           if (imageSource.length > 0) {
           imageSource.forEach( async (uri, i) => {
             try {

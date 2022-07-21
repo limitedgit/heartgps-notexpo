@@ -59,7 +59,7 @@ export default function LoginScreen({navigation}) {
     //callback function for amazon cognito user login
     const cognitoCallbacks = {
         mfaRequired: function(err) {
-          setModalVisible(!modalVisible)
+          setModalVisible(true)
         },
         onSuccess: async function(result) {
             console.log("success")
@@ -70,11 +70,10 @@ export default function LoginScreen({navigation}) {
             storeUserAuthData(idToken, accessToken, refreshToken, phoneNumber);
             dispatch({type: "setUser", payload: cognitoUser.getUsername()}), [dispatch]
             let userData = await getUserdata();
-            if (userData == null){
-                setModalVisible(false)
+            setModalVisible(false)
+            if (userData == null){ 
                 navigation.navigate("Age")
             } else {
-                setModalVisible(false)
                 navigation.navigate("Main")
             }
             
@@ -142,8 +141,8 @@ export default function LoginScreen({navigation}) {
         },
     }
 
-    //callback function for amazon cognito user sign in confirmation
-    const cognitoCallbacksSignIn = {
+    //callback function for amazon cognito user sign up confirmation
+    const cognitoCallbacksSignUp = {
         onSuccess: async function(result) {
             
             let idToken = result.getIdToken().getJwtToken();
@@ -163,6 +162,7 @@ export default function LoginScreen({navigation}) {
             storeUserAuthData(idToken, accessToken, refreshToken, phoneNumber);
 
             dispatch({type: "setUser", payload: cognitoUser.getUsername()}), [dispatch]
+            setModalVisible(false)
             navigation.navigate("Age")
     },
         onFailure: function(err) {
@@ -239,7 +239,7 @@ export default function LoginScreen({navigation}) {
                                                         Password: 'password',
                                                     };
                                                     var authenticationDetails = new AuthenticationDetails(authenticationData);
-                                                    cognitoUser.authenticateUser(authenticationDetails,  cognitoCallbacksSignIn);
+                                                    cognitoUser.authenticateUser(authenticationDetails,  cognitoCallbacksSignUp);
                                                     });
 
                                             }
