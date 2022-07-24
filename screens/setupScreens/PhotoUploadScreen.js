@@ -6,7 +6,7 @@ import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import { Icon } from 'react-native-elements'
 import EncryptedStorage from 'react-native-encrypted-storage';
 import {CognitoUserPool,CognitoUserAttribute,CognitoUser,AuthenticationDetails,} from 'amazon-cognito-identity-js';
-import * as AWS from 'aws-sdk/global';
+import { useDispatch } from 'react-redux';
 
 export default function PhotoUploadScreen({navigation}) {
 const [imageSource, changeImageSource] = useState([]);
@@ -25,89 +25,9 @@ const userPool = new CognitoUserPool(poolData);
     changeImageSource(photos)
   }
 
-
-  const refreshTokens = async (blob, i) => {
-
-      const session = await EncryptedStorage.getItem("user_session");
-      //if there is no session user needs to re-login
-      const refresh_token = (JSON.parse(session).refreshToken);
-  
-      if (refresh_token == null){
-        console.log("null refresh token")
-        alert("please log in again")
-        navigation.navigate("Landing");
-        return 
-      }
-      //get idtoken stored in session
-      //use built in check needs Refresh function
-      
-      const refreshTokenGetter = {
-        getToken: function(){
-          return refresh_token;
-        }
-      }
-      const username = (JSON.parse(session).username);
-      let userData = {
-        Username: username,
-        Pool: userPool,
-      };
-      const cognitoUser = new CognitoUser(userData);
-      console.log(cognitoUser)
-      cognitoUser.refreshSession(refreshTokenGetter, async (err, result) => {
-        var accessToken;
-        var idToken;
-        console.log(result)
-        try {
-          accessToken = result.getAccessToken().getJwtToken();
-        } catch (err) {
-            console.log(err)
-            return
-        }
-        if (err) {
-          console.log(err);
-        } else if (accessToken != null) {
-          //refresh the token and store it in user_session
-          console.log(result)
-          await EncryptedStorage.setItem(
-            "user_session",
-            JSON.stringify({
-                idToken : idToken,
-                accessToken : accessToken,
-                refreshToken: refresh_token,
-                username : username,
-            })
-          );
-
-          let result = await fetch(uploadLink, {
-            method: 'POST',
-            // mode: 'cors',
-            headers: {
-              'Content-Type': 'text/plain',
-              "Authorization": idToken
-            },
-            body: JSON.stringify(bodyData)
-            })
-            
-            result = await result.json();
-            console.log(result)
-            let signedURL = result.uploadURL;
-            let blobData = blob;
-            let result2 = await fetch(signedURL, {
-                method: 'PUT',
-                body: blobData
-            })
-          
-        } else {
-          alert("login has expired, please login again")
-          navigation.navigate("Landing");
-          return
-        }
-      });
-    
-
-  }
-
   const upLoadPhotoBlob =  async (blob, i) => {
+
+    console.log("uploading blob")
 
     let bodyData = {
       photoNum : i,
@@ -121,6 +41,7 @@ const userPool = new CognitoUserPool(poolData);
         return 
     }
     let idToken = await (JSON.parse(session).idToken);
+    console.log("waiting for upload link")
     let result = await fetch(uploadLink, {
       method: 'POST',
       // mode: 'cors',
@@ -130,16 +51,20 @@ const userPool = new CognitoUserPool(poolData);
       },
       body: JSON.stringify(bodyData)
     })
+
+    
     const resultStatusCode  = result.status;
     result = await result.json()
-   
+    console.log("status code: ", resultStatusCode)
     if (resultStatusCode != 401){
+      
       let signedURL = result.uploadURL;
       let blobData = blob;
       let result2 = await fetch(signedURL, {
         method: 'PUT',
         body: blobData
       })
+      console.log("uploaded photos")
 
     } else {
 
@@ -201,13 +126,15 @@ const userPool = new CognitoUserPool(poolData);
             })
             
             result = await result.json();
-            console.log(result)
+            console.log("uploading using link")
             let signedURL = result.uploadURL;
             let blobData = blob;
             let result2 = await fetch(signedURL, {
                 method: 'PUT',
                 body: blobData
+                
             })
+            console.log("uploaded photos")
           
         } else {
           alert("login has expired, please login again")
@@ -223,9 +150,11 @@ const userPool = new CognitoUserPool(poolData);
 
     
   }
-  const uploadProfile = () => {
+  const uploadProfile = async () => {
     //TODO
     //upload profile from redux
+    console.log("uploading profile")
+
   }
 
   //renders each of the photos on display or a placeholder image
@@ -327,22 +256,29 @@ const userPool = new CognitoUserPool(poolData);
 
         <View style = {{flex: 0.2}}/>
         
-        <Pressable style = {styles.button} onPress = {() => {
+        <Pressable style = {styles.button} onPress = {async () => {
           console.log('pressed continue')
           if (imageSource.length > 0) {
           imageSource.forEach( async (uri, i) => {
             try {
+              console.log("getting photo details")
               const result = await fetch(uri);
+              console.log("getting photo data")
               const blob = await result.blob(); 
+              console.log("uploading photos")
               await upLoadPhotoBlob(blob, i);
-              await uploadProfile();
-
             } catch (err){
               alert("something went wrong, please try again later")
               console.log(err)
-            }
-           
-          })
+            }})
+          try {
+            await uploadProfile();
+            navigation.navigate("Main")
+          } catch (err){
+            alert("something went wrong, please try again later")
+            console.log(err)
+          }
+          
         } else {
           alert("please choose at least one photo to upload")
         }

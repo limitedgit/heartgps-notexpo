@@ -4,6 +4,7 @@ import React, {useEffect, useState} from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { Icon } from 'react-native-elements';
+import appStyles from '../../appstyles';
  
 //import Geolocation from '@react-native-community/geolocation';
 
@@ -111,15 +112,15 @@ const pinImage = require("../../images/map-pin.png");
      
       <View style = {{flex: 0.3}}>
 
-        <Pressable>
-          <Text>
+        <Pressable style = {styles.button}>
+          <Text style = {styles.buttonText}>
             send
           </Text>
           </Pressable>
         
-        <Pressable onPress={() => {
+        <Pressable style = {styles.button} onPress={() => {
           navigation.goBack()}}>
-          <Text>
+          <Text style = {styles.buttonText}>
           back
           </Text>
         </Pressable>
@@ -133,6 +134,8 @@ const pinImage = require("../../images/map-pin.png");
 
 const styles = StyleSheet.create( 
   {
+    ...appStyles,
+    
     container :{
       flex:1, 
       flexDirection: 'column',

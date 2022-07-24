@@ -12,7 +12,14 @@ const Matches = [
 ] 
 
 
+const getMatches = async () =>{
+  //TODO 
+  //get matches from backend and load into Matches
+}
+
 export default function ProfileScreen({navigation}) {
+  
+  console.log("")
 
 const renderMatches =  Matches.map( (item, i) => {
 

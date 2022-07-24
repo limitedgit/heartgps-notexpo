@@ -7,7 +7,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import MainScreen from './maintabs/MainScreen';
 import AgeScreen from './setupScreens/AgeScreen';
 import LandingScreen from './setupScreens/LandingScreen';
-import PasswordScreen from './setupScreens/PasswordScreen';
 import LoginScreen from './setupScreens/LoginScreen';
 import MainSettings from './settings/MainSettings';
 import DefaultMapScreen from './mapScreens/DefaultMapScreen';
@@ -45,6 +44,8 @@ export default function NavigationScreen() {
         initialRouteName= {"PhotoUpload"}  
         // initialRouteName= {( isLoggedIn ? "Main" : "Landing")}
         //initialRouteName= {( user.currentUser ? "Main" : "Landing")}
+        //initialRouteName={"Main"}
+        //initialRouteName={"DefaultMap"}
         
         screenOptions={{
             headerShown: false,
@@ -52,7 +53,6 @@ export default function NavigationScreen() {
           }}>
           <Stack.Screen name="Landing" component={LandingScreen}  />
           <Stack.Screen name="Login" component={LoginScreen}/>
-          <Stack.Screen name="Password" component={PasswordScreen} />
           <Stack.Screen name="Main" component={MainScreen} />
           <Stack.Screen name="MainSettings" component={MainSettings}/>
           <Stack.Screen name="Age" component={AgeScreen} />

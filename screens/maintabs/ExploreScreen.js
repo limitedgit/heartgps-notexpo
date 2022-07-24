@@ -14,6 +14,11 @@ const Users = [
     { id: "4", image: require("../../images/heartGPS-logo.png")},
 ] 
 
+const getMatchableProfiles = async() => {
+  //TODO
+  //FILL USERS WITH MATCHABLE PROFILES FROM BACKEND
+}
+
 
 export default function ExploreScreen({navigation}) {
 //initialize pan position

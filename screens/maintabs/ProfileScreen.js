@@ -9,6 +9,10 @@ export default function ProfileScreen({navigation}) {
     imageSource =  require("../../images/smile-person2.jpeg");
     
     const [modalVisible, setModalVisible] = useState(false);
+    const getUserPhotos = async() => {
+        //TODO
+        //GET USER PHOTOS FROM S3
+    }
     return (
         <SafeAreaView style = {styles.container}>
             
