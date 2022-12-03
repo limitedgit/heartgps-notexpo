@@ -19,16 +19,16 @@ const userPool = new CognitoUserPool(poolData);
 
   //TODO FOR IOS ADD IMAGE PICKER KEYS TO INFOPLIST NSPhotoLibraryUsageDescription
 
+  //remove photos from selected photos
   const deletePhoto = (i) => {
     let photos = [...imageSource];
     photos.splice(i,1)
     changeImageSource(photos)
   }
 
+  //upload photos to s3
   const upLoadPhotoBlob =  async (blob, i) => {
-
     console.log("uploading blob")
-
     let bodyData = {
       photoNum : i,
       fileType: blob._data.type,
@@ -56,8 +56,7 @@ const userPool = new CognitoUserPool(poolData);
     const resultStatusCode  = result.status;
     result = await result.json()
     console.log("status code: ", resultStatusCode)
-    if (resultStatusCode != 401){
-      
+    if (resultStatusCode !== 401){
       let signedURL = result.uploadURL;
       let blobData = blob;
       let result2 = await fetch(signedURL, {
@@ -65,10 +64,7 @@ const userPool = new CognitoUserPool(poolData);
         body: blobData
       })
       console.log("uploaded photos")
-
     } else {
-
-
       console.log("token expired")
       //await refreshTokens(blob, i);
       
