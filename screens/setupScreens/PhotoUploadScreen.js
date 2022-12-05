@@ -8,13 +8,17 @@ import EncryptedStorage from 'react-native-encrypted-storage';
 import {CognitoUserPool,CognitoUserAttribute,CognitoUser,AuthenticationDetails,} from 'amazon-cognito-identity-js';
 import { useDispatch } from 'react-redux';
 
+
+import uploadLink  from '../../backendAPI/awscognito/imagebucket';
+import poolData from '../../backendAPI/awscognito/userpool';
 export default function PhotoUploadScreen({navigation}) {
 const [imageSource, changeImageSource] = useState([]);
-const uploadLink = "https://ez7z5iatzl.execute-api.us-east-1.amazonaws.com/Prod/uploads";
-const poolData = {
-  UserPoolId: 'us-east-1_ruYdvZa9g', // Your user pool id here
-  ClientId: 'q62on7a2t5hac9l2re48kg2j6', // Your client id here
-};
+//const uploadLink = "https://ez7z5iatzl.execute-api.us-east-1.amazonaws.com/Prod/uploads";
+//const uploadLink = Link;
+// const poolData = {
+//   UserPoolId: 'us-east-1_k5blQaI81', // Your user pool id here
+//   ClientId: '5u5p8ltc8pqhm8tc5fdepvqtc2', // Your client id here
+// };
 const userPool = new CognitoUserPool(poolData);
 
   //TODO FOR IOS ADD IMAGE PICKER KEYS TO INFOPLIST NSPhotoLibraryUsageDescription

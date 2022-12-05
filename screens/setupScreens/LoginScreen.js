@@ -6,6 +6,7 @@ import {CognitoUserPool,CognitoUserAttribute,CognitoUser,AuthenticationDetails,}
 import { useSelector, useDispatch } from 'react-redux';
 import EncryptedStorage from 'react-native-encrypted-storage';
 import appStyles from '../../appstyles';
+import poolData from '../../backendAPI/awscognito/userpool';
 //import Prompt from 'react-native-prompt';
 
 
@@ -13,10 +14,10 @@ import appStyles from '../../appstyles';
 // OTHER SIGNUP/LOGIN SCREENS ARE CURRENTLY UNUSED
 const SCREEN_HEIGHT = Dimensions.get('window').height
 const SCREEN_WIDTH = Dimensions.get('window').width
-const poolData = {
-    UserPoolId: 'us-east-1_ruYdvZa9g', // Your user pool id here
-    ClientId: 'q62on7a2t5hac9l2re48kg2j6', // Your client id here
-};
+// const poolData = {
+//     UserPoolId: 'us-east-1_k5blQaI81', // Your user pool id here
+//     ClientId: '5u5p8ltc8pqhm8tc5fdepvqtc2', // Your client id here
+// };
 const userPool = new CognitoUserPool(poolData);
 var cognitoUser = null;
 
@@ -132,7 +133,7 @@ export default function LoginScreen({navigation}) {
             
             })
 
-            } else if (err.name == "CodeMismatchException"){
+            } else if (err.name === "CodeMismatchException"){
                 alert("Incorrect code entered")
             }else{
                 alert(err)

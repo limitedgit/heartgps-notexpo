@@ -44,8 +44,9 @@ export default function NavigationScreen() {
         //initialRouteName= {"PhotoUpload"}  
         // initialRouteName= {( isLoggedIn ? "Main" : "Landing")}
         //initialRouteName= {( user.currentUser ? "Main" : "Landing")}
-        initialRouteName={"Main"}
+        //initialRouteName={"Main"}
         //initialRouteName={"DefaultMap"}
+        initialRouteName= {("Landing")}
         
         screenOptions={{
             headerShown: false,
